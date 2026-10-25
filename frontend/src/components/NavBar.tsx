@@ -99,9 +99,9 @@ const NavBar = () =>
     }
 
     return (
-        <nav className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-app-border">
+        <nav className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-app-border ">
             {/* Mobile: flex. Desktop (md+): 3 columns, so the middle column is truly centered */ }
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] gap-4">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] gap-4 ">
 
                 {/* Left: Logo */ }
                 <Link to="/" className="flex items-center gap-2 text-[22px] font-semibold text-app-green shrink-0 justify-self-start">
@@ -136,7 +136,7 @@ const NavBar = () =>
                     {/* Search, desktop (lg+): icon expands inline into an input */ }
                     <form onSubmit={ handleSearch } className="hidden lg:block">
                         <div
-                            className={ `flex items-center overflow-hidden rounded-full transition-all duration-300 ease-out
+                            className={ `flex  items-center overflow-hidden rounded-full transition-all duration-300 ease-out
                                 ${ searchOpen
                                     ? "w-72 bg-orange-50 ring-1 ring-app-orange/30 focus-within:ring-app-orange/60 "
                                     : "w-9 hover:bg-gray-100" }` }
@@ -317,8 +317,8 @@ const NavBar = () =>
                     ${ searchOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]" }` }
             >
                 <div className={ `overflow-hidden transition-[visibility] duration-300 ${ searchOpen ? "visible" : "invisible" }` }>
-                    <form onSubmit={ handleSearch } className="px-4 pb-3">
-                        <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 rounded-full ring-1 ring-app-orange/30 focus-within:ring-app-orange/60">
+                    <form onSubmit={ handleSearch } className="px-4 pt-1 pb-3">
+                        <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 rounded-full border border-app-orange/30 focus-within:border-app-orange/60 transition-colors">
                             <SearchIcon className="size-4 text-zinc-400 shrink-0" />
                             <input
                                 ref={ mobileInputRef }

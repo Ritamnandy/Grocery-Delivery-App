@@ -110,7 +110,7 @@ const NavBar = () =>
                 </Link>
 
                 {/* Center: desktop navigation */ }
-                <div className="hidden md:flex items-center gap-8">
+                <div className="hidden md:flex items-center gap-14">
                     { MenuLink.map( ( { to, label } ) => (
                         <NavLink
                             key={ to }

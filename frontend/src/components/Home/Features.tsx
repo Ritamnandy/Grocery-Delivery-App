@@ -5,7 +5,7 @@ import { heroSectionData } from "../../assets/assets"
 function Features ()
 {
     return (
-        <section className="bg-white py-5 border border-app-border/80 rounded-xl">
+        <section className="bg-white py-5 border border-app-border/80 rounded-x mt-6 rounded-2xl">
 
             <div className="mx-auto px-4 sm:px-6 lg:px-8">
 

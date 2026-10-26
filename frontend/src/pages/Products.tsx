@@ -4,6 +4,8 @@ import { Home, SlidersHorizontalIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, 
 import type { Product } from "../types"
 import { categoriesData, dummyProducts } from "../assets/assets"
 import ProductsCard from "../components/ProductsCard"
+import SortSelect from "../components/SortSelect"
+import ProductsGridSkeleton from "../components/ProductsGridSkeleton"
 
 const PAGE_SIZE = 12
 
@@ -65,7 +67,7 @@ export default function Products ()
         setTotalCount( result.length )
         setTotalPages( pages )
         setProducts( result.slice( ( page - 1 ) * PAGE_SIZE, page * PAGE_SIZE ) )
-        setLoading( false )
+        
     }
 
     const upDateFilters = ( key: string, value: string ) =>
@@ -103,6 +105,9 @@ export default function Products ()
     {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchProducts()
+        setTimeout(() => {
+            setLoading(false)
+        }, 1000)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ category, organic, sort, page, maxPrice, minPrice ] )
 
@@ -221,33 +226,18 @@ export default function Products ()
                                     { hasFilters && <span className="size-1.5 rounded-full bg-app-orange" /> }
                                 </button>
 
-                                <select
+                                <SortSelect
                                     value={ sort }
-                                    onChange={ ( e ) => upDateFilters( "sort", e.target.value ) }
-                                    aria-label="Sort products"
-                                    className="px-3 py-2 text-xs bg-white border border-app-border rounded-lg outline-none focus:border-app-green focus:ring-2 focus:ring-app-green/20 cursor-pointer transition-all"
-                                >
-                                    { SORT_OPTIONS.map( ( o ) => (
-                                        <option key={ o.value } value={ o.value }>{ o.label }</option>
-                                    ) ) }
-                                </select>
+                                    options={ SORT_OPTIONS }
+                                    onChange={ ( v ) => upDateFilters( "sort", v ) }
+                                    ariaLabel="Sort products"
+                                />
                             </div>
                         </div>
 
                         {/* Grid */ }
                         { loading ? (
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                                { Array.from( { length: 8 } ).map( ( _, i ) => (
-                                    <div key={ i } className="bg-white rounded-2xl overflow-hidden shadow animate-pulse">
-                                        <div className="aspect-square bg-gray-100" />
-                                        <div className="p-3.5 space-y-2">
-                                            <div className="h-3 bg-gray-100 rounded w-3/4" />
-                                            <div className="h-3 bg-gray-100 rounded w-1/3" />
-                                            <div className="h-4 bg-gray-100 rounded w-1/2" />
-                                        </div>
-                                    </div>
-                                ) ) }
-                            </div>
+                            <ProductsGridSkeleton count={ 10 } />
                         ) : products.length === 0 ? (
                             <div className="flex flex-col items-center text-center py-20">
                                 <PackageSearchIcon className="size-14 text-app-text-light mb-4" />

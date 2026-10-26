@@ -1,6 +1,12 @@
 import { TruckIcon, LeafIcon, ClockIcon, ShieldCheckIcon, MapPinIcon, PhoneIcon, MailIcon } from "lucide-react";
 import { SiFacebook, SiX, SiInstagram } from "@icons-pack/react-simple-icons";
 import hero_bg from "./hero_bg.jpeg";
+import hero_bg1 from "./hero1.jpg";
+import hero_bg2 from "./hero2.jpg";
+import hero_bg3 from "./hero3.jpeg";
+import hero_bg4 from "./hero4.jpeg";
+import hero_bg5 from "./hero5.jpeg";
+import hero_bg6 from "./hero6.jpeg";
 import delivery_truck from "./delivery_truck.svg";
 import fruits_vegetables from "./fruits_vegetables.png";
 import dairy_eggs from "./dairy_eggs.png";
@@ -33,7 +39,13 @@ export const categoriesData = [
 
 export const heroSectionData = {
     description: "Fresh, organic groceries delivered from local farms to your doorstep. Quality you can taste, convenience you deserve.",
-    hero_image: hero_bg,
+    hero_image0: hero_bg,
+    hero_image1: hero_bg1,
+    hero_image2: hero_bg2,
+    hero_image3: hero_bg3,
+    hero_image4: hero_bg4,
+    hero_image5: hero_bg5,
+    hero_image6: hero_bg6,
     hero_features: [
         { icon: TruckIcon, title: "Free Delivery", desc: "Orders over $20" },
         { icon: LeafIcon, title: "100% Organic", desc: "Certified products" },
@@ -51,7 +63,7 @@ export const appPromoBannerData = {
 
 export const footerData = {
     brand: {
-        name: "Instacart",
+        name: "InstantMart",
         description: "Bringing fresh, organic groceries straight from local farms to your doorstep. Nourish your home with Earth's finest.",
         socials: [
             { icon: SiFacebook, link: "#" },
@@ -76,7 +88,7 @@ export const footerData = {
                 { label: "My Account", to: "#" },
                 { label: "Order History", to: "#" },
                 { label: "Addresses", to: "#" },
-                { label: "Help Center", href: "#" },
+                { label: "Help Center", to: "#" },
             ],
         },
     ],
@@ -88,13 +100,14 @@ export const footerData = {
     ],
 
     bottom: {
-        copyright: "© 2026 Greatstack. All rights reserved.",
+        copyright: `© ${ new Date().getFullYear() } Ritam. Made with ❤️. All rights reserved.`,
         links: [
             { label: "Privacy Policy", href: "#" },
             { label: "Terms of Service", href: "#" },
         ],
     },
 };
+
 
 export const statusColors: Record<string, string> = {
     Placed: "bg-blue-100 text-blue-700",
@@ -846,9 +859,9 @@ export const dummyDashboardOrdersData = [
 ];
 
 export const dummyCartData = [
-    { product: dummyProducts[0], quantity: 1 },
-    { product: dummyProducts[1], quantity: 1 },
-    { product: dummyProducts[2], quantity: 1 },
+    { product: dummyProducts[ 0 ], quantity: 1 },
+    { product: dummyProducts[ 1 ], quantity: 1 },
+    { product: dummyProducts[ 2 ], quantity: 1 },
 ];
 
 export const dummyAddressData = [

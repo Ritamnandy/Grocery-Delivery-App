@@ -6,6 +6,7 @@ import
     PackageIcon, SearchIcon, ShieldIcon, ShoppingCartIcon, UserIcon, XIcon,
 } from "lucide-react"
 import { getUserName } from "../utils/userName"
+import { useCart } from "../context/cartContext"
 
 const MenuLink = [
     { to: "/", label: "Home" },
@@ -27,10 +28,7 @@ const NavBar = () =>
         isAdmin: true
     }
 
-    const { cartCount, setIsCartOpen } = {
-        cartCount: 5,
-        setIsCartOpen: ( _data: boolean ) => { },
-    }
+    const { cartCount, setIsCartOpen } = useCart()
 
     const [ searchQuery, setSearchQuery ] = useState( "" )
     const [ searchOpen, setSearchOpen ] = useState( false )

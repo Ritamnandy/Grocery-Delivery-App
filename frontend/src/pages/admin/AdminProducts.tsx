@@ -28,7 +28,7 @@ export default function AdminProducts() {
         console.log(id);
     };
 
-    if (loading) return <Loading />
+    if (loading) return <Loading fullScreen />
 
     return (
         <>

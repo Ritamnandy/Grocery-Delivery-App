@@ -642,7 +642,7 @@ export const dummyProducts = [
 
 export const dummyAdminDashboardData = {
     totalOrders: 1,
-    totalUsers: 3,
+    totalUsers: 4,
     totalProducts: 27,
     outOfStock: 0,
     totalPartners: 2,

@@ -186,3 +186,115 @@ input:focus {
     .os-ring, .os-confetti-piece { display: none; }
     .os-circle, .os-check { animation: none; stroke-dashoffset: 0; }
 }
+
+
+@keyframes nf-drop-in {
+    0%   { opacity: 0; transform: translateY(-60px) scale(0.9); }
+    60%  { opacity: 1; transform: translateY(8px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes nf-float {
+    0%, 100% { transform: translateY(0) rotate(var(--nf-rot, 0deg)); }
+    50%      { transform: translateY(-16px) rotate(calc(var(--nf-rot, 0deg) + 8deg)); }
+}
+@keyframes nf-wobble {
+    0%, 100% { transform: rotate(-8deg); }
+    50%      { transform: rotate(8deg); }
+}
+@keyframes nf-fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes nf-drive {
+    from { transform: translateX(-140px); }
+    to   { transform: translateX(calc(100vw + 140px)); }
+}
+@keyframes nf-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+}
+@keyframes nf-road {
+    from { background-position: 0 0; }
+    to   { background-position: -48px 0; }
+}
+@keyframes nf-pulse-ring {
+    0%   { transform: scale(0.95); opacity: 0.5; }
+    100% { transform: scale(1.35); opacity: 0; }
+}
+
+.nf-drop-in  { opacity: 0; animation: nf-drop-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.nf-float    { animation: nf-float 5s ease-in-out infinite; }
+.nf-wobble   { animation: nf-wobble 2.4s ease-in-out infinite; transform-origin: 50% 20%; }
+.nf-fade-up  { opacity: 0; animation: nf-fade-up 0.6s ease-out forwards; }
+.nf-drive    { animation: nf-drive 9s linear infinite; }
+.nf-bob      { animation: nf-bob 0.5s ease-in-out infinite; }
+.nf-road     {
+    background-image: linear-gradient(90deg, rgba(0,0,0,0.18) 50%, transparent 50%);
+    background-size: 48px 100%;
+    animation: nf-road 0.8s linear infinite;
+}
+.nf-ring     { animation: nf-pulse-ring 2.2s ease-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+    .nf-drop-in, .nf-fade-up { animation: none; opacity: 1; }
+    .nf-float, .nf-wobble, .nf-bob, .nf-road, .nf-ring { animation: none; }
+    .nf-drive { animation: none; transform: translateX(40vw); }
+    .nf-ring { display: none; }
+}
+
+
+@keyframes fb-drop-in {
+    0%   { opacity: 0; transform: translateY(-60px) scale(0.9); }
+    60%  { opacity: 1; transform: translateY(8px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fb-fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fb-swing {
+    0%, 100% { transform: rotate(-5deg); }
+    50%      { transform: rotate(5deg); }
+}
+@keyframes fb-shake {
+    0%, 60%, 100% { transform: translateX(0) rotate(0); }
+    64% { transform: translateX(-6px) rotate(-6deg); }
+    70% { transform: translateX(6px) rotate(6deg); }
+    76% { transform: translateX(-5px) rotate(-4deg); }
+    82% { transform: translateX(5px) rotate(4deg); }
+    88% { transform: translateX(-2px) rotate(-2deg); }
+}
+@keyframes fb-shackle {
+    0%, 60%, 100% { transform: translateY(0); }
+    66%, 84%      { transform: translateY(-3px); }
+}
+@keyframes fb-float {
+    0%, 100% { transform: translateY(0) rotate(var(--fb-rot, 0deg)); }
+    50%      { transform: translateY(-14px) rotate(calc(var(--fb-rot, 0deg) + 8deg)); }
+}
+@keyframes fb-ring {
+    0%   { transform: scale(0.95); opacity: 0.5; }
+    100% { transform: scale(1.35); opacity: 0; }
+}
+@keyframes fb-tape {
+    from { background-position: 0 0; }
+    to   { background-position: 56.57px 0; } /* one full stripe cycle, so the loop is seamless */
+}
+
+.fb-drop-in { opacity: 0; animation: fb-drop-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.fb-fade-up { opacity: 0; animation: fb-fade-up 0.6s ease-out forwards; }
+.fb-swing   { transform-origin: 50% 0; animation: fb-swing 3.2s ease-in-out infinite; }
+.fb-shake   { transform-origin: 50% 80%; animation: fb-shake 3.6s ease-in-out infinite; }
+.fb-shackle { animation: fb-shackle 3.6s ease-in-out infinite; }
+.fb-float   { animation: fb-float 5s ease-in-out infinite; }
+.fb-ring    { animation: fb-ring 2.2s ease-out infinite; }
+.fb-tape {
+    background-image: repeating-linear-gradient(45deg, #f97316 0 20px, #14532d 20px 40px);
+    animation: fb-tape 2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fb-drop-in, .fb-fade-up { animation: none; opacity: 1; }
+    .fb-swing, .fb-shake, .fb-shackle, .fb-float, .fb-tape { animation: none; }
+    .fb-ring { display: none; }
+}

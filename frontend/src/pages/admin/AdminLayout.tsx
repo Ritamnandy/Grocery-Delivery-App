@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { PlusIcon, PackageSearchIcon, ShoppingBagIcon, LogOutIcon, BarChart3Icon, ShieldIcon, Truck } from "lucide-react";
-import Navbar from "../../components/Navbar";
+import NavBar from "../../components/NavBar";
+
 
 export default function AdminLayout() {
 
@@ -16,7 +17,7 @@ export default function AdminLayout() {
     return (
         <div className="h-screen overflow-hidden">
             <div className="max-lg:hidden">
-                <Navbar />
+                <NavBar />
             </div>
             <div className="flex flex-col h-full lg:flex-row gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
                 {/* Admin Sidebar */}

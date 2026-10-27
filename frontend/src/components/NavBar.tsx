@@ -287,7 +287,7 @@ const NavBar = () =>
                                 ) ) }
 
                                 { user?.isAdmin && (
-                                    <Link to="/admin/products" className={ dropdownLink }>
+                                    <Link to="/admin" className={ dropdownLink }>
                                         <ShieldIcon className="size-4" />
                                         <span className="text-app-orange-dark">Admin Panel</span>
                                     </Link>

@@ -14,6 +14,18 @@ import Addresses from "./pages/Addresses"
 import ProtectedRoute from "./components/ProtectedRoute"
 import ResetPasswordPage from "./components/ResetPasswordPage"
 import OrderSuccess from "./pages/OrderSuccess"
+import AdminLayout from "./pages/admin/AdminLayout"
+import AdminDashboard from "./pages/admin/AdminDashboard"
+import AdminProducts from "./pages/admin/AdminProducts"
+import AdminProductForm from "./pages/admin/AdminProductForm"
+import AdminOrders from "./pages/admin/AdminOrders"
+import AdminDeliveryPartners from "./pages/admin/AdminDeliveryPartners"
+import DeliveryLayout from "./pages/delivery/DeliveryLayout"
+import DeliveryLogin from "./pages/delivery/DeliveryLogin"
+import DeliveryDashboard from "./pages/delivery/DeliveryDashboard"
+import NotFound from "./pages/NotFound"
+import AdminRoute from "./pages/admin/AdminRoute"
+import Forbidden from "./components/Forbidden"
 
 
 
@@ -28,7 +40,6 @@ function App ()
         <Route path="/reset-password" element={ <ResetPasswordPage /> } />
         {/* Main pages  - With NavBar/Footer */ }
         <Route path="/" element={ <AppLayout /> }>
-
           <Route index element={ <Home /> } />
           <Route path="products" element={ <Products /> } />
           <Route path="products/:id" element={ <ProductsPage /> } />
@@ -40,14 +51,28 @@ function App ()
             <Route path="myorders" element={ <MyOrders /> } />
             <Route path="myorders/:id" element={ <OrderTracking /> } />
             <Route path="addresses" element={ <Addresses /> } />
-            <Route path="/order-success" element={ <OrderSuccess /> } />
+            <Route path="order-success" element={ <OrderSuccess /> } />
           </Route>
-
-
-
+        </Route>
+        {/* Admin pages */ }
+        <Route element={ <AdminRoute /> }>
+          <Route path="/admin" element={ <AdminLayout /> }>
+            <Route index element={ <AdminDashboard /> } />
+            <Route path="products" element={ <AdminProducts /> } />
+            <Route path="products/new" element={ <AdminProductForm /> } />
+            <Route path="products/:id/edit" element={ <AdminProductForm /> } />
+            <Route path="orders" element={ <AdminOrders /> } />
+            <Route path="delivery-partners" element={ <AdminDeliveryPartners /> } />
+          </Route>
         </Route>
 
-
+        {/* Delivery Partner pages */ }
+        <Route path="/delivery/login" element={ <DeliveryLogin /> } />
+        <Route path="/delivery" element={ <DeliveryLayout /> }>
+          <Route index element={ <DeliveryDashboard /> } />
+        </Route>
+        <Route path="/forbidden" element={ <Forbidden /> } />
+        <Route path="*" element={ <NotFound /> } />
       </Routes>
 
 

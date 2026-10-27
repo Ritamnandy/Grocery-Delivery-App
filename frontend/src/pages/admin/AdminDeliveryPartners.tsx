@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { PlusIcon, XIcon, TruckIcon, PhoneIcon, MailIcon } from "lucide-react";
 import type { DeliveryPartner } from "../../types";
-import Loading from "../../components/Loading";
+
 import { dummyDeliveryPartnerData } from "../../assets/assets";
+import Loading from "../../components/Loading";
 
 export default function AdminDeliveryPartners() {
     const [partners, setPartners] = useState<DeliveryPartner[]>([]);
@@ -17,6 +18,7 @@ export default function AdminDeliveryPartners() {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchPartners();
     }, []);
 
@@ -29,7 +31,7 @@ export default function AdminDeliveryPartners() {
         console.log(id, isActive);
     };
 
-    if (loading) return <Loading />;
+    if (loading) return <Loading fullScreen/>;
 
     return (
         <div className="space-y-6">

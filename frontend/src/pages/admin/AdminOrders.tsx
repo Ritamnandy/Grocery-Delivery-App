@@ -26,6 +26,7 @@ export default function AdminOrders() {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchOrders();
         fetchPartners();
     }, []);
@@ -42,7 +43,7 @@ export default function AdminOrders() {
     };
 
     const statusOptions = ["Placed", "Confirmed", "Assigned", "Packed", "Out for Delivery", "Delivered", "Cancelled"];
-    const statusColors: any = {
+    const statusColors: Record<string, string> = {
         Placed: "bg-blue-100 text-blue-800",
         Confirmed: "bg-amber-100 text-amber-800",
         Assigned: "bg-indigo-100 text-indigo-800",
@@ -52,7 +53,7 @@ export default function AdminOrders() {
         Cancelled: "bg-red-100 text-red-800",
     };
 
-    if (loading) return <Loading />
+    if (loading) return <Loading fullScreen />
 
     return (
         <>

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PackageIcon, UsersIcon, ShoppingBagIcon, AlertTriangleIcon } from "lucide-react";
+
+import { dummyAdminDashboardData, statusStyles } from "../../assets/assets";
 import Loading from "../../components/Loading";
-import { dummyAdminDashboardData, statusColors } from "../../assets/assets";
 
 interface Stats {
     totalOrders: number;
@@ -35,7 +36,7 @@ export default function AdminDashboard() {
         ]
         : [];
 
-    if (loading) return <Loading />
+    if (loading) return <Loading fullScreen />
 
     return (
         <div className="space-y-6">
@@ -90,7 +91,7 @@ export default function AdminDashboard() {
                                         <td className="px-6 py-4 text-zinc-600">{order.items?.length || 0} items</td>
                                         <td className="px-6 py-4 font-medium">{currency}{order.total?.toFixed(2)}</td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[order.status] || "bg-zinc-100 text-zinc-600"}`}>
+                                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusStyles[order.status] || "bg-zinc-100 text-zinc-600"}`}>
                                                 {order.status}
                                             </span>
                                         </td>

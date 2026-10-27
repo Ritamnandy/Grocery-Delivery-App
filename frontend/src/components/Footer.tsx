@@ -25,8 +25,8 @@ function Footer ()
                     {/* social icons */ }
                     <div className='flex items-center gap-3 mt-4'>
                         {
-                            footerData.brand.socials.map( ( social ) => (
-                                <a href={ social.link } key={ social.link } className="size-9 rounded-lg bg-white/10 flex-center hover:bg-white/2">
+                            footerData.brand.socials.map( ( social,index ) => (
+                                <a href={ social.link } key={ index } className="size-9 rounded-lg bg-white/10 flex-center hover:bg-white/2">
                                     <social.icon className="size-4" />
                                 </a>
                             ) )

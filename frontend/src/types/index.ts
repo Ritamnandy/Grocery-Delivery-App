@@ -87,3 +87,14 @@ export interface Order {
     isPaid: boolean;
     createdAt: string;
 }
+
+
+export interface formInput
+{
+    label: string;
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+    isDefault: boolean;
+}

@@ -107,7 +107,7 @@ const SortSelect = ( { value, options, onChange, ariaLabel = "Sort" }: Props ) =
                             aria-selected={ isSelected }
                             onClick={ () => choose( o.value ) }
                             onMouseEnter={ () => setActiveIndex( i ) }
-                            className={ `flex items-center justify-between gap-2 px-3.5 py-2.5 text-xs cursor-pointer transition-colors
+                            className={ `flex items-center justify-between gap-2 px-3.5 py-2.5 text-sm cursor-pointer transition-colors
                                 ${ isSelected ? "text-orange-600 font-semibold" : "text-zinc-600" }
                                 ${ i === activeIndex ? "bg-orange-50" : "" }` }
                         >

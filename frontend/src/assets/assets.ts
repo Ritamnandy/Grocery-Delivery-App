@@ -111,6 +111,9 @@ export const footerData = {
 
 export const statusStyles: Record<string, string> = {
     placed: "bg-blue-50 text-blue-600",
+    confirmed: "bg-blue-50 text-blue-600",
+    assigned: "bg-blue-50 text-blue-600",
+    packed: "bg-blue-50 text-blue-600",
     "out for delivery": "bg-orange-50 text-orange-500",
     delivered: "bg-green-100 text-green-600",
     cancelled: "bg-red-50 text-red-500",

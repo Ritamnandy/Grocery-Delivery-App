@@ -92,7 +92,7 @@ export default function MyOrders ()
                             role="tab"
                             aria-selected={ activeTab === tab }
                             onClick={ () => setActiveTab( tab ) }
-                            className={ `px-4 py-2 text-xs font-medium rounded-full whitespace-nowrap transition-colors cursor-pointer
+                            className={ `px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors cursor-pointer
                                 ${ activeTab === tab
                                     ? "bg-app-green text-white"
                                     : "bg-white text-zinc-600 hover:bg-orange-50 hover:text-orange-600" }` }

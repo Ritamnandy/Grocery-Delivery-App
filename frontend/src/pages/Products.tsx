@@ -133,7 +133,7 @@ export default function Products ()
                         <li key={ c.slug }>
                             <button
                                 onClick={ () => { upDateFilters( "category", c.slug ); setMobileFiltersOpen( false ) } }
-                                className={ `w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors
+                                className={ `w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors
                                     ${ category === c.slug
                                         ? "bg-app-green text-white"
                                         : "text-zinc-600 hover:bg-orange-50 hover:text-orange-600" }` }

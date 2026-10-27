@@ -26,6 +26,8 @@ import DeliveryDashboard from "./pages/delivery/DeliveryDashboard"
 import NotFound from "./pages/NotFound"
 import AdminRoute from "./pages/admin/AdminRoute"
 import Forbidden from "./components/Forbidden"
+import GoogleLoginError from "./pages/GoogleLoginError"
+import GoogleLoginSuccess from "./pages/GoogleLoginSuccess"
 
 
 
@@ -38,6 +40,8 @@ function App ()
         {/* Auth pages  - No NavBar/Footer */ }
         <Route path="/login" element={ <Login /> } />
         <Route path="/reset-password" element={ <ResetPasswordPage /> } />
+        <Route path="/auth/google/success" element={ <GoogleLoginSuccess /> } />
+        <Route path="/auth/google/error" element={ <GoogleLoginError /> } />
         {/* Main pages  - With NavBar/Footer */ }
         <Route path="/" element={ <AppLayout /> }>
           <Route index element={ <Home /> } />

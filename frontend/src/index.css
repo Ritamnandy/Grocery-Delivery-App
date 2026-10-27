@@ -298,3 +298,45 @@ input:focus {
     .fb-swing, .fb-shake, .fb-shackle, .fb-float, .fb-tape { animation: none; }
     .fb-ring { display: none; }
 }
+
+
+@keyframes gl-pop {
+    0%   { transform: scale(0.6); opacity: 0; }
+    60%  { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes gl-draw { to { stroke-dashoffset: 0; } }
+@keyframes gl-fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes gl-ring {
+    0%   { transform: scale(0.9); opacity: 0.5; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+@keyframes gl-progress {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+@keyframes gl-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.gl-pop      { animation: gl-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.gl-circle   { stroke-dasharray: 166; stroke-dashoffset: 166; animation: gl-draw 0.7s 0.2s ease-out forwards; }
+.gl-check    { stroke-dasharray: 48;  stroke-dashoffset: 48;  animation: gl-draw 0.4s 0.8s ease-out forwards; }
+.gl-x        { stroke-dasharray: 26;  stroke-dashoffset: 26;  animation: gl-draw 0.35s 0.8s ease-out forwards; }
+.gl-x + .gl-x { animation-delay: 1s; }
+.gl-ring     { animation: gl-ring 1.8s 0.9s ease-out infinite; }
+.gl-fade-up  { opacity: 0; animation: gl-fade-up 0.6s ease-out forwards; }
+.gl-progress { transform-origin: left; transform: scaleX(0); animation: gl-progress linear forwards; }
+.gl-shake    { animation: gl-shake 0.5s 0.9s ease-in-out; }
+
+@media (prefers-reduced-motion: reduce) {
+    .gl-pop, .gl-fade-up, .gl-shake { animation: none; opacity: 1; }
+    .gl-ring { display: none; }
+    .gl-circle, .gl-check, .gl-x { animation: none; stroke-dashoffset: 0; }
+    .gl-progress { animation: none; transform: scaleX(1); }
+}

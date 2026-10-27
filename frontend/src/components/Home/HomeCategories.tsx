@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import { categoriesData } from "../../assets/assets"
+import { Reveal } from "../MotionReveal"
 
 const RESUME_DELAY = 2000 // ms to wait before sliding again
 
@@ -39,7 +40,7 @@ function HomeCategories ()
 
     return (
         <section className="py-16">
-            <div className="max-w-7xl mx-auto">
+            <Reveal className="max-w-7xl mx-auto">
                 <div className="px-4 sm:px-6 lg:px-8">
                     <h2 className="text-2xl font-semibold text-app-text-dark">Browse Categories</h2>
                     <p className="text-app-text-light mt-1 text-sm">Find exactly what you need using</p>
@@ -79,8 +80,8 @@ function HomeCategories ()
                                     } }
                                     className="group flex flex-col items-center gap-3 p-4 shrink-0"
                                 >
-                                    <div className="size-18 sm:size-26 sm:p-2 rounded-2xl overflow-hidden bg-orange-100 group-hover:ring-2 ring-orange-300/75 transition-all">
-                                        <img src={ category.image } alt={ category.name } className="w-full h-full object-contain rounded-full transition-all" />
+                                    <div className="size-18 sm:size-26 sm:p-2 rounded-2xl overflow-hidden bg-orange-100 group-hover:ring-2 ring-orange-300/75 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:shadow-orange-200/60">
+                                        <img src={ category.image } alt={ category.name } className="w-full h-full object-contain rounded-full transition-transform duration-500 group-hover:scale-110" />
                                     </div>
                                     <span className="text-center text-xs font-medium text-zinc-600 leading-tight">{ category.name }</span>
                                 </Link>
@@ -88,7 +89,7 @@ function HomeCategories ()
                         } ) }
                     </div>
                 </div>
-            </div>
+            </Reveal>
         </section>
     )
 }

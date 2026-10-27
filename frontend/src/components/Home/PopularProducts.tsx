@@ -4,6 +4,7 @@ import { dummyProducts } from "../../assets/assets"
 import { Link } from "react-router-dom"
 import { ArrowRightIcon } from "lucide-react"
 import ProductsCard from "../ProductsCard"
+import { Reveal, StaggerItem } from "../MotionReveal"
 
 
 
@@ -38,7 +39,7 @@ function PopularProducts ()
         <section className="pb-16">
             <div className="max-w-7xl mx-auto">
 
-                <div className="flex items-center justify-between mb-8">
+                <Reveal className="flex items-center justify-between mb-8" y={ 14 }>
 
                     <div>
                         <h2 className="text-2xl font-semibold">Popular Products</h2>
@@ -48,14 +49,14 @@ function PopularProducts ()
                     {
                         window.scrollTo( 0, 0 )
                     } } to="/products" className="text-app-green font-semibold text-sm flex items-center gap-1 text-app-orange hover:text-app-orange-dark transition-colors hover:underline ">View All <ArrowRightIcon className="size-4" /></Link>
-                </div>
+                </Reveal>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5  gap-4 xl:gap-8">
                     {
-                        products.map( ( product ) => (
-                            <div key={ product._id }>
+                        products.map( ( product, index ) => (
+                            <StaggerItem key={ product._id } index={ index }>
                                 <ProductsCard product={ product } />
-                            </div>
+                            </StaggerItem>
                         ) )
                     }
                 </div>

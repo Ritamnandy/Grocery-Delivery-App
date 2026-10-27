@@ -9,11 +9,11 @@ export default function AdminDeliveryPartners() {
     const [partners, setPartners] = useState<DeliveryPartner[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    const [saving, setSaving] = useState(false);
+    const saving = false;
     const [form, setForm] = useState({ name: "", email: "", password: "", phone: "", vehicleType: "bike" });
 
     const fetchPartners = async () => {
-        setPartners(dummyDeliveryPartnerData as any)
+        setPartners(dummyDeliveryPartnerData as unknown as DeliveryPartner[])
         setTimeout(() => setLoading(false), 1000)
     };
 

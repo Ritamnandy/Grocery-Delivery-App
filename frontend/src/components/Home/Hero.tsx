@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { ArrowRightIcon, ChevronLeftIcon, ChevronRightIcon, LeafIcon } from "lucide-react"
 import { heroSectionData } from "../../assets/assets"
 import { Link } from "react-router-dom"
+import { motion, useReducedMotion } from "motion/react"
 
 const heroImages: string[] = [
     heroSectionData.hero_image0,
@@ -23,6 +24,7 @@ function Hero ()
     const [ animate, setAnimate ] = useState( true )
     const [ paused, setPaused ] = useState( false )
     const touchStartX = useRef<number | null>( null )
+    const reduceMotion = useReducedMotion()
 
     // first image is repeated at the end so the loop has no visible jump
     const slides = [ ...heroImages, heroImages[ 0 ] ]
@@ -121,22 +123,28 @@ function Hero ()
             </div>
 
             <div className="absolute inset-0 bg-linear-to-r from-app-green via-app-green/65 to-transparent" />
+            <div className="absolute -top-24 left-[35%] size-80 rounded-full bg-app-orange/15 blur-3xl motion-safe:animate-[pulse-soft_5s_ease-in-out_infinite]" />
 
             {/* Fixed text */ }
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
-                <div className="max-w-xl xl:pl-10">
-                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-orange-300 bg-orange-300/10 rounded-full mb-5">
+                <motion.div
+                    className="max-w-xl xl:pl-10"
+                    initial={ reduceMotion ? false : { opacity: 0, y: 22 } }
+                    animate={ reduceMotion ? undefined : { opacity: 1, y: 0 } }
+                    transition={ { duration: 0.7, ease: [ 0.22, 1, 0.36, 1 ] } }
+                >
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-orange-300 bg-orange-300/10 rounded-full mb-5 backdrop-blur-sm">
                         <LeafIcon className="size-3" /> Farm-Fresh & Organic
                     </span>
                     <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-white leading-tight mb-5">Nourish your home
                         with <span className="text-orange-300">Earth's finest</span></h1>
                     <p className="text-base text-white/70 leading-relaxed mb-8 max-w-md">{ heroSectionData.description }</p>
                     <div className="flex flex-wrap gap-3">
-                        <Link to="/products" className="px-7 py-3 bg-orange-400 text-white font-semibold rounded-full hover:bg-orange-500 transition-all flex-center gap-2 active:scale-[0.98]">Shop Now <ArrowRightIcon className="size-4" /></Link>
+                        <Link to="/products" className="group px-7 py-3 bg-orange-400 text-white font-semibold rounded-full hover:bg-orange-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-950/25 transition-all flex-center gap-2 active:scale-[0.98]">Shop Now <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-0.5" /></Link>
 
                         <Link to="/products" className="px-7 py-3 bg-white/10 text-white font-semibold rounded-full hover:bg-white/20 transition-all border border-white/20">Browse Categories </Link>
                     </div>
-                </div>
+                </motion.div>
             </div>
 
             {/* Arrows (desktop, visible on hover) */ }

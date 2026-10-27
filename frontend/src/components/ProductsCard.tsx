@@ -18,16 +18,16 @@ function ProductsCard ( { product }: Props )
     const { addToCart } = useCart()
 
     return (
-        <div className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-md transition-all duration-300 group animate-fade-in cursor-pointer" onClick={ () =>
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm ring-1 ring-black/3 hover:shadow-xl hover:shadow-app-green/10 hover:-translate-y-1 transition-all duration-300 group cursor-pointer" onClick={ () =>
         {
             navigate( `/products/${ product._id }` )
             scrollTo( 0, 0 )
         } }>
             {/* Image */ }
             <div className="relative aspect-square overflow-hidden">
-                <img src={ product.image } alt={ product.name } className="w-full h-full object-cover p-4 group-hover:p-2 transition-all duration-300" />
+                <img src={ product.image } alt={ product.name } className="w-full h-full object-cover p-4 group-hover:p-2 group-hover:scale-105 transition-all duration-500" />
                 {/* Badge */ }
-                <div className="absolute top-3 left-3flex flex-wrap gap-1.5">
+                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
 
                     {
                         product.discount > 0 && (
@@ -73,7 +73,7 @@ function ProductsCard ( { product }: Props )
                             )
                         }
                     </div>
-                    <button className="size-7 bg-app-orange text-white text-xs font-semibold shrink-0 flex-center rounded-full hover:bg-app-orange-dark transition-colors active:scale-95" onClick={ ( e ) =>
+                    <button aria-label={ `Add ${ product.name } to cart` } className="size-7 bg-app-orange text-white text-xs font-semibold shrink-0 flex-center rounded-full hover:bg-app-orange-dark hover:scale-110 transition-all active:scale-95" onClick={ ( e ) =>
                     {
                         e.stopPropagation()
                         addToCart(product)

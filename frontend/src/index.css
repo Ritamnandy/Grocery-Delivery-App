@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=DM+Serif+Display:ital@0;1&display=swap");
+
 @import "tailwindcss";
 
 @theme {
@@ -26,6 +27,7 @@ body {
     background-color: var(--color-app-cream);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
 }
 
 /* Scrollbar */
@@ -52,6 +54,13 @@ a,
 button {
     transition: all 0.2s ease;
     cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-app-orange) 45%, transparent);
+    outline-offset: 3px;
 }
 input:focus {
     outline: none;
@@ -150,6 +159,12 @@ input:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
     .skeleton { animation: none; }
 }
 

@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  admin
+  user
+}
+
+enum UserStatus {
+  pending
+  active
+  suspended
+  deleted
+}
+
+model User {
+  id           String     @id @default(cuid()) @map("user_id")
+  googleId     String?    @unique @map("google_id")
+  name         String     @map("user_name")
+  email        String     @unique @map("user_email")
+  password     String?    @map("user_password")
+  isVerified   Boolean    @default(false) @map("is_verified")
+  role         UserRole   @default(user) @map("role")
+  avatar       String?    @default("") @map("avatar")
+  avatarId     String?    @map("avatar_id")
+  refreshToken String?    @map("refresh_token")
+  status       UserStatus @default(pending) @map("status")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  orders    Order[]
+  addresses Address[]
+
+  @@map("users")
+}
+
+model Address {
+  id        String   @id @default(uuid()) @map("address_id")
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String   @map("label")
+  address   String   @map("address")
+  city      String   @map("city")
+  state     String   @map("state")
+  zip       String   @map("zip")
+  isDefault Boolean  @default(false) @map("is_default")
+  lat       Float    @map("lat")
+  lng       Float    @map("lng")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("addresses")
+}
+
+model Product {
+  id            String   @id @default(uuid()) @map("product_id")
+  name          String   @map("name")
+  description   String?  @default("") @map("description")
+  price         Float    @map("price")
+  originalPrice Float?   @default(0) @map("original_price")
+  image         String   @map("image")
+  imageId       String?  @map("image_id")
+  category      String   @map("category")
+  unit          String?  @default("piece") @map("unit")
+  stock         Int?     @default(0) @map("stock")
+  isOrganic     Boolean? @default(false) @map("is_organic")
+  rating        Float?   @default(0) @map("rating")
+  reviewCount   Int?     @default(0) @map("review_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("products")
+}
+
+enum OrderStatus {
+  placed
+  confirmed
+  outForDelivery
+  delivered
+  cancelled
+  packed
+  assigned
+}
+
+model Order {
+  id              String @id @default(uuid()) @map("order_id")
+  userId          String @map("user_id")
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           Json   @map("items")
+  shippingAddress Json   @map("shipping_address")
+  paymentMethod   String @default("card") @map("payment_method")
+  subtotal        Float  @map("subtotal")
+  deliveryFee     Float? @default(0) @map("delivery_fee")
+  tax             Float? @default(0) @map("tax")
+  total           Float  @map("total")
+  status          OrderStatus @default(placed) @map("status")
+  statusHistory   Json   @map("status_history")
+
+  deliveryPartnerId String?          @map("delivery_partner_id")
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id], onDelete: SetNull)
+  deliveryOtp       String?          @default("") @map("delivery_otp")
+  liveLocation      Json?            @map("live_location")
+  isPaid            Boolean?         @default(false) @map("is_paid")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+enum VehicleType {
+  bike
+  car
+  scooter
+}
+
+
+model DeliveryPartner {
+  id          String   @id @default(uuid()) @map("delivery_partner_id")
+  name        String   @map("name")
+  email       String   @unique @map("email")
+  password    String   @map("password")
+  phone       String   @map("phone")
+  avatar      String?  @default("") @map("avatar")
+  avatarId    String?  @map("avatar_id")
+  vehicleType VehicleType? @default(bike) @map("vehicle_type")
+  isActive    Boolean? @default(true) @map("is_active")
+  orders      Order[]
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+}

@@ -7,6 +7,8 @@ type OrderEmailItem = {
 };
 
 type OrderConfirmedData = {
+    toEmail: string;
+    name?: string;
     orderId: string;
     items: OrderEmailItem[];
     subtotal: number;
@@ -20,6 +22,8 @@ type OrderConfirmedData = {
 
 
 type DeliveryConfirmedData = {
+    toEmail: string;
+    name?: string;
     orderId: string;
     deliveredAt: string | Date;
     total: number;
@@ -52,6 +56,36 @@ type ChangedPasswordConfirmation = {
     name: string
 };
 
+
+const QUEUE_NAME = 'EmailQueue'
+
+enum MailJob
+{
+    Welcome = 'welcome',
+    VerifyEmail = 'verify-email',
+    ResetPassword = 'reset-password',
+    PasswordChanged = 'password-changed',
+    OrderConfirmed = 'order-confirmed',
+    DeliveryConfirmed = 'delivery-confirmed',
+}
+
+interface MailPayloads
+{
+    [ MailJob.Welcome ]: WellcomeMail;
+    [ MailJob.VerifyEmail ]: VerifyEmail;
+    [ MailJob.ResetPassword ]: ResetPassword;
+    [ MailJob.PasswordChanged ]: ChangedPasswordConfirmation;
+    [ MailJob.OrderConfirmed ]: OrderConfirmedData;
+    [ MailJob.DeliveryConfirmed ]: DeliveryConfirmedData;
+}
+
+interface MailContent
+{
+    to: string;
+    subject: string;
+    html: string;
+}
+
 export type {
     OrderEmailItem,
     OrderConfirmedData,
@@ -59,5 +93,13 @@ export type {
     WellcomeMail,
     VerifyEmail,
     ResetPassword,
-    ChangedPasswordConfirmation
+    ChangedPasswordConfirmation,
+    MailContent,
+    MailPayloads
+}
+
+export
+{
+    QUEUE_NAME,
+    MailJob
 }

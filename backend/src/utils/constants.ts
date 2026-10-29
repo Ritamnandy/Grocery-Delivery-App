@@ -3,13 +3,7 @@ import crypto from 'node:crypto'
 import bcrypt from 'bcrypt'
 
 
-const DB_NAME = 'Movie_Ticket_Booking'
-const QUEUE_NAME = 'EmailQueue'
-const SECOND_QUEUE_NAME = 'NotificationQueue'
-const WellComeMail = 'WellComeMail'
-const VerifyEmailMail = 'VerifyEmailMail'
-const ResetPasswordMail = 'ResetPasswordMail'
-const PasswordChangedMail = 'PasswordChangedMail'
+
 
 const hashPassword = async ( password: string ) =>
 {
@@ -48,13 +42,6 @@ const ResetPasswordLink = ( token: string ) =>
 
 
 export {
-    DB_NAME,
-    QUEUE_NAME,
-    SECOND_QUEUE_NAME,
-    WellComeMail,
-    VerifyEmailMail,
-    ResetPasswordMail,
-    PasswordChangedMail,
     generateOtp,
     safeEqual,
     createHashData,

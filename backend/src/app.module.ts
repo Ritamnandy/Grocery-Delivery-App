@@ -15,6 +15,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { EmailModule } from './email/email.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ImageModule } from './image/image.module.js';
+import { AppController } from './app.controller.js';
 
 
 @Module( {
@@ -54,6 +55,7 @@ import { ImageModule } from './image/image.module.js';
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
   ],
+  controllers: [AppController],
 } )
 export class AppModule implements NestModule
 {

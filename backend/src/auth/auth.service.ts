@@ -1,9 +1,8 @@
-import { BadRequestException, HttpException, Injectable, NotFoundException, UnauthorizedException, UploadedFile } from '@nestjs/common';
-import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
+import { BadRequestException, HttpException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../redis/redis.service.js';
 import { JsonWebTokenError, JwtService, NotBeforeError, TokenExpiredError } from '@nestjs/jwt';
-import { ImageService } from '../image/image.service.js';
 import { StringValue } from 'ms';
 import type { JwtPayload, JwtRefreshPayload } from '../types/payload.types.js';
 import { RegisteruserDto } from './dto/registeruser.dto.js';
@@ -16,17 +15,18 @@ import { ResetpasswordDto } from './dto/resetpassword.dto.js';
 import { GoogleOauthBody } from '../types/google.oauth.js';
 import { AuthRepository } from '../repository/auth.repository.js';
 import { EmailService } from '../email/email.service.js';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class AuthService
 {
+    private readonly logger = new Logger( AuthService.name );
     constructor (
-        @InjectPinoLogger( AuthService.name ) private readonly logger: PinoLogger,
+
         private readonly authRepository: AuthRepository,
         private readonly redisService: RedisService,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
-        private readonly imageService: ImageService,
         private readonly mailsService: EmailService
     ) { }
 
@@ -115,7 +115,7 @@ export class AuthService
                 this.logger.error( 'Failed to send verification email,inside register service', error )
             } )
         ] )
-        this.logger.info( "User registration issued", { email: data.email } )
+        this.logger.log( "User registration issued", { email: data.email } )
         return {
             message: "OTP sent successfully , please verify your email"
         }
@@ -149,7 +149,7 @@ export class AuthService
                 this.logger.error( 'Failed to send verification email,inside resendOtp service', error )
             } )
         ] )
-        this.logger.info( `Verification OTP resent`, { email: data.email } )
+        this.logger.log( `Verification OTP resent`, { email: data.email } )
         return {
             message: 'OTP resent successfully , please verify your email'
         }
@@ -216,7 +216,7 @@ export class AuthService
         ] )
 
 
-        this.logger.info( "User registered successfully", { email: createdUser.email } )
+        this.logger.log( "User registered successfully", { email: createdUser.email } )
         return {
             message: 'User registered successfully',
             accessToken: accessToken,
@@ -243,7 +243,7 @@ export class AuthService
             email: result.email,
             role: result.role
         } )
-
+        await this.authRepository.setUserStatus( result.id, 'active' )
         const tokenPair = await this.genarateTokenPair( jwt, refresh )
         if ( !tokenPair )
         {
@@ -253,7 +253,7 @@ export class AuthService
 
 
 
-        this.logger.info( `User logged in successfully`, { email: result.email } )
+        this.logger.log( `User logged in successfully`, { email: result.email } )
         return {
             message: 'User logged in successfully',
             accessToken: accessToken!,
@@ -274,7 +274,7 @@ export class AuthService
             throw new BadRequestException( 'Failed to logout user, please try again later' )
         }
         await this.clearUserProfileCache( userId )
-        this.logger.info( `User logged out successfully `, { email: result.email } )
+        this.logger.log( `User logged out successfully `, { email: result.email } )
         return {
             message: 'User logged out successfully'
         }
@@ -311,7 +311,7 @@ export class AuthService
             throw new BadRequestException( 'Failed to generate token pair, please try again later' )
         }
         const { accessToken, refreshToken } = tokenPair
-        this.logger.info( `Refreshed access token`, { email: result.email } )
+        this.logger.log( `Refreshed access token`, { email: result.email } )
 
         return {
             message: 'Access token refreshed successfully',
@@ -347,7 +347,7 @@ export class AuthService
                 this.logger.error( 'Failed to send reset password email,inside forgot password service', error )
             } )
         ] )
-        this.logger.info( 'Reset password link sent', { email: result.email } )
+        this.logger.log( 'Reset password link sent', { email: result.email } )
         return response
     }
 
@@ -362,12 +362,12 @@ export class AuthService
         const cachedEmail = await this.redisService.get( resetTokenKey( hashedToken ) )
         if ( !cachedEmail )
         {
-            throw invalid()
+            throw new BadRequestException( 'Invalid or expired reset token' )
         }
         const result = await this.authRepository.findUserByEmail( cachedEmail )
         if ( !result )
         {
-            throw invalid()
+            throw new BadRequestException( 'Invalid or expired reset token' )
         }
         const hashedPassword = await hashPassword( data.password )
         const response = await this.authRepository.updateUserPassword( result.id, hashedPassword )
@@ -386,7 +386,7 @@ export class AuthService
                 this.logger.error( 'Failed to send password changed email,inside reset password service', error )
             } )
         ] )
-        this.logger.info( `Password reset successfully for ${ cachedEmail }` )
+        this.logger.log( `Password reset successfully for ${ cachedEmail }` )
         return {
             message: 'Password reset successfully'
         }
@@ -394,6 +394,7 @@ export class AuthService
 
     async googleLogin ( data: GoogleOauthBody )
     {
+        let isNewUser = false
         // 1. Google email verification check
         if ( !data.isEmailVerified )
         {
@@ -417,6 +418,7 @@ export class AuthService
                 try
                 {
                     user = await this.authRepository.googleLogin( { ...data } )
+                    isNewUser = true
                 } catch ( error )
                 {
                     // 7. Handle concurrent first login
@@ -424,6 +426,7 @@ export class AuthService
                     user = await this.authRepository.findUserByGoogleId( data.googleId )
                     if ( !user )
                     {
+                        isNewUser = false
                         this.logger.error( 'Google signup failed', error instanceof Error ? error.stack : String( error ) )
                         throw new BadRequestException( 'Could not sign in with Google' )
                     }
@@ -450,7 +453,14 @@ export class AuthService
             throw new BadRequestException( 'Failed to generate token pair, please try again later' )
         }
         const { accessToken, refreshToken } = tokenPair
-        this.logger.info( { email: user.email }, 'User logged in with google' )
+        if ( isNewUser )
+        {
+            await this.mailsService.sendWelcomeMail( {
+                name: user.name,
+                toEmail: user.email
+            } )
+        }
+        this.logger.log( { email: user.email }, 'User logged in with google' )
         // 10. Return response
         return {
             success: true,

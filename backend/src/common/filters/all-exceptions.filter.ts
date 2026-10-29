@@ -6,16 +6,14 @@ import
     ExceptionFilter,
     HttpException,
     HttpStatus,
+    Logger,
   } from '@nestjs/common';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import type { Request, Response } from 'express';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter
 {
-  constructor (
-    @InjectPinoLogger( AllExceptionsFilter.name ) private readonly logger: PinoLogger,
-  ) { }
+  private readonly logger=new Logger(AllExceptionsFilter.name)
 
   catch ( exception: unknown, host: ArgumentsHost )
   {

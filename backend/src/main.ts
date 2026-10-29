@@ -1,20 +1,25 @@
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
-import { Logger } from 'nestjs-pino';
+import { Logger as PinoLogger } from 'nestjs-pino';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
 import { availableParallelism } from 'node:os';
 import { runPrimary } from './workers.js'
 import cluster from 'node:cluster';
+import { isProduction, nestLogLevels } from './logger/logger.config.js';
 
 
 async function bootstrap ()
 {
-  const app = await NestFactory.create<NestExpressApplication>( AppModule, { bufferLogs: true } );
+  const prod = isProduction();
+  const app = await NestFactory.create<NestExpressApplication>( AppModule, {
+    bufferLogs: prod, // only buffer when pino will take over
+    logger: prod ? undefined : nestLogLevels( process.env.LOG_LEVEL ?? 'debug' ),
+  } );
   app.set( 'trust proxy', 1 );
   app.use( cookieParser() );
   app.use( compression() );
@@ -23,7 +28,10 @@ async function bootstrap ()
     origin: process.env.COR_ORIGIN,
     credentials: true,
   } );
-  app.useLogger( app.get( Logger ) );
+  if ( prod )
+  {
+    app.useLogger( app.get( PinoLogger ) ); // pino replaces Nest's logger
+  }
   app.enableShutdownHooks(); // flushes logs and closes connections on SIGTERM
   app.setGlobalPrefix( 'api/v1' );
   app.useGlobalPipes(
@@ -36,7 +44,8 @@ async function bootstrap ()
 
   const port = process.env.PORT ?? 3000;
   await app.listen( port );
-  app.get( Logger ).log( `Server running on port ${ port } (pid ${ process.pid })`, 'Bootstrap' );
+  // Nest's Logger works in both envs (pino-backed in prod via useLogger)
+  new Logger( 'Bootstrap' ).log( `Server running on port ${ port } (pid ${ process.pid })` );
 }
 
 

@@ -2,15 +2,18 @@
 import { Injectable } from "@nestjs/common";
 import { Strategy, Profile } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+
 import type { GoogleOauthBody } from "../../types/google.oauth.js";
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy( Strategy, 'google' ) {
+
+    private readonly logger = new Logger( GoogleStrategy.name );
     constructor (
-        @InjectPinoLogger( GoogleStrategy.name ) private readonly logger: PinoLogger,
+        
         private readonly configService: ConfigService )
     {
         super( {
@@ -40,7 +43,7 @@ export class GoogleStrategy extends PassportStrategy( Strategy, 'google' ) {
                 isEmailVerified: profile._json[ 'email_verified' ] as boolean,
             };
             req.body = profileData;
-            this.logger.info( "google oauth profile processed successfully" );
+            this.logger.log( "google oauth profile processed successfully" );
             return req.body;
         } catch ( error )
         {

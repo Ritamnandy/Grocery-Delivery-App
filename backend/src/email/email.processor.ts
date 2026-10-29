@@ -1,7 +1,7 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { Job, UnrecoverableError } from 'bullmq';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+
 import Nodemailer, { type Transporter } from 'nodemailer';
 
 import { MailJob, QUEUE_NAME, type MailContent, type MailPayloads } from '../types/email.types.js';
@@ -14,6 +14,7 @@ import
     verifyEmailTemplate,
     welcomeTemplate,
 } from './email.templates.js';
+import { Logger } from '@nestjs/common';
 
 const OTP_TTL_MIN = 5;
 const RESET_LINK_TTL_MIN = 10; // keep in sync with where the token is created
@@ -34,7 +35,7 @@ export class EmailProcessor extends WorkerHost
 {
     private readonly transporter: Transporter;
     private readonly from: string;
-
+    private readonly logger = new Logger( EmailProcessor.name );
     // One builder per job type; the compiler checks each payload type
     private readonly builders: { [ K in MailJob ]: ( d: MailPayloads[ K ] ) => MailContent } = {
         [ MailJob.Welcome ]: ( d ) => ( {
@@ -70,7 +71,7 @@ export class EmailProcessor extends WorkerHost
     };
 
     constructor (
-        @InjectPinoLogger( EmailProcessor.name ) private readonly logger: PinoLogger,
+
         config: ConfigService,
     )
     {
@@ -103,7 +104,7 @@ export class EmailProcessor extends WorkerHost
         {
             const info = await this.transporter.sendMail( { from: this.from, to, subject, html } );
 
-            this.logger.info(
+            this.logger.log(
                 { jobId: job.id, jobName: job.name, to: maskEmail( to ), messageId: info.messageId },
                 'Mail sent',
             );

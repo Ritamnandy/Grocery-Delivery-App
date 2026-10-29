@@ -1,7 +1,6 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JsonWebTokenError, JwtService, NotBeforeError, TokenExpiredError } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
 import type { AuthenticatedRequest } from '../../types/auth-request.type.js';
 
 
@@ -9,8 +8,8 @@ import type { AuthenticatedRequest } from '../../types/auth-request.type.js';
 @Injectable()
 export class AuthGuard implements CanActivate
 {
+  private readonly logger = new Logger( AuthGuard.name );
   constructor (
-    @InjectPinoLogger( 'HTTP' ) private readonly logger: PinoLogger,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
   ) { }

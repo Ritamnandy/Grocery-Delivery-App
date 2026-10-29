@@ -1,7 +1,6 @@
 
 
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, Logger } from "@nestjs/common";
 
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from "@prisma/client/runtime/client";
 import { PrismaService } from "../prisma/prisma.service.js";
@@ -12,9 +11,9 @@ import { GoogleOauthBody } from "../types/google.oauth.js";
 @Injectable()
 export class AuthRepository
 {
+    private readonly logger = new Logger( AuthRepository.name );
 
     constructor (
-        @InjectPinoLogger( AuthRepository.name ) private readonly logger: PinoLogger,
         private readonly prisma: PrismaService,
     ) { }
 
@@ -71,6 +70,7 @@ export class AuthRepository
                     role: 'user',
                     isVerified: true,
                     status: 'active',
+                    avatar: null
                 },
 
             } )
@@ -185,7 +185,8 @@ export class AuthRepository
                     avatar: data.profileImage,
                     isVerified: data.isEmailVerified,
                     role: 'user',
-                    status: 'active'
+                    status: 'active',
+
                 }
             } )
 
@@ -220,7 +221,8 @@ export class AuthRepository
                     id: userId
                 },
                 data: {
-                    googleId
+                    googleId,
+                    status: 'active'
                 }
             } )
         } catch ( error )
@@ -229,6 +231,23 @@ export class AuthRepository
         }
     }
 
-   
+
+    async setUserStatus ( userId: string, status: 'active' | 'deleted' | 'pending' | 'suspended' )
+    {
+        try
+        {
+            return await this.prisma.user.update( {
+                where: {
+                    id: userId
+                },
+                data: {
+                    status
+                }
+            } )
+        } catch ( error )
+        {
+            this.handleError( error, 'setUserStatus' );
+        }
+    }
 
 }

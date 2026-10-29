@@ -3,16 +3,16 @@ import type { Response } from 'express';
 import { AuthService } from './auth.service.js';
 import { Throttle } from '@nestjs/throttler';
 import { RegisteruserDto } from './dto/registeruser.dto.js';
-import type { ResendcodeDto } from './dto/resendcode.dto.js';
-import type { VerifyuserDto } from './dto/verifyuser.dto.js';
-import type { LoginuserDto } from './dto/loginuser.dto.js';
-import type { RefreshtokenDto } from './dto/refreshtoken.dto.js';
+import { ResendcodeDto } from './dto/resendcode.dto.js';
+import { VerifyuserDto } from './dto/verifyuser.dto.js';
+import { LoginuserDto } from './dto/loginuser.dto.js';
+import { RefreshtokenDto } from './dto/refreshtoken.dto.js';
 import { AuthGuard } from './authguard/auth.guard.js';
 import type { AuthenticatedRequest } from '../types/auth-request.type.js';
-import type { ResetpasswordDto } from './dto/resetpassword.dto.js';
+import { ResetpasswordDto } from './dto/resetpassword.dto.js';
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import type { GoogleOauthBody } from '../types/google.oauth.js';
-import type { ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 
 @Controller( 'auth' )
 export class AuthController

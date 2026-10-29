@@ -6,7 +6,7 @@ import
     InternalServerErrorException,
     Logger,
 } from '@nestjs/common';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+
 import { ConfigService } from '@nestjs/config';
 import ImageKit from '@imagekit/nodejs';
 import sharp from 'sharp';
@@ -17,9 +17,9 @@ import { Multer } from 'multer';
 export class ImageService
 {
     private readonly imageKit: ImageKit;
-
+    private readonly logger = new Logger( ImageService.name );
     constructor (
-        @InjectPinoLogger( ImageService.name ) private readonly logger: PinoLogger,
+
         private readonly configService: ConfigService,
     )
     {
@@ -83,7 +83,7 @@ export class ImageService
 
             if ( result )
             {
-                this.logger.info( `Image uploaded successfully: ${ result.fileId }` );
+                this.logger.log( `Image uploaded successfully: ${ result.fileId }` );
             }
 
             return {

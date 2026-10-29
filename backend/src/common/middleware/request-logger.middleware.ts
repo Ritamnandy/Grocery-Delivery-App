@@ -1,7 +1,6 @@
 
 
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
 
 const IGNORED_PATHS = [ '/health', '/favicon.ico' ];
@@ -10,9 +9,7 @@ const SLOW_REQUEST_MS = 1000;
 @Injectable()
 export class RequestLoggerMiddleware implements NestMiddleware
 {
-  constructor (
-    @InjectPinoLogger( 'HTTP' ) private readonly logger: PinoLogger,
-  ) { }
+  private readonly logger = new Logger( RequestLoggerMiddleware.name );
 
   use ( req: Request, res: Response, next: NextFunction )
   {
@@ -61,7 +58,7 @@ export class RequestLoggerMiddleware implements NestMiddleware
         this.logger.warn( data, 'Slow request' );
       } else
       {
-        this.logger.info( data, 'Request completed' );
+        this.logger.log( data, 'Request completed' );
       }
     } );
 

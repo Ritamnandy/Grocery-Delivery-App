@@ -15,6 +15,7 @@ import { LoginuserDto } from './dto/loginuser.dto.js';
 import { ResetpasswordDto } from './dto/resetpassword.dto.js';
 import { GoogleOauthBody } from '../types/google.oauth.js';
 import { AuthRepository } from '../repository/auth.repository.js';
+import { EmailService } from '../email/email.service.js';
 
 @Injectable()
 export class AuthService
@@ -25,7 +26,8 @@ export class AuthService
         private readonly redisService: RedisService,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
-        private readonly imageService: ImageService
+        private readonly imageService: ImageService,
+        private readonly mailsService: EmailService
     ) { }
 
     private async clearUserProfileCache ( userId: string )
@@ -100,14 +102,18 @@ export class AuthService
             throw new BadRequestException( 'User with this email already exists' )
         }
         const otp = generateOtp()
+        const passwordHash = await hashPassword( data.password );
         await Promise.all( [
-            this.redisService.set( registerKey( data.email ), JSON.stringify( data ), REGISTER_DATA_EXPIRY ),
+            this.redisService.set( registerKey( data.email ), JSON.stringify( { ...data, password: passwordHash } ), REGISTER_DATA_EXPIRY ),
             this.redisService.set( otpKey( data.email ), otp, OTP_EXPIRY ),
-            /*  this.mailsService.VerificationMail( {
+            this.mailsService.sendVerifyEmailMail( {
                 name: data.name,
                 toEmail: data.email,
                 otp
-            } )*/
+            } ).catch( ( error ) =>
+            {
+                this.logger.error( 'Failed to send verification email,inside register service', error )
+            } )
         ] )
         this.logger.info( "User registration issued", { email: data.email } )
         return {
@@ -134,11 +140,14 @@ export class AuthService
         await Promise.all( [
             this.redisService.set( otpKey( data.email ), otp, OTP_EXPIRY ),
             this.redisService.set( otpCooldownKey( data.email ), '1', OTP_RESEND_COOLDOWN ),
-            /* this.mailsService.VerificationMail( {
-                    name: name,
-                    toEmail: data.email,
-                    otp
-                } )*/
+            this.mailsService.sendVerifyEmailMail( {
+                name: name,
+                toEmail: data.email,
+                otp
+            } ).catch( ( error ) =>
+            {
+                this.logger.error( 'Failed to send verification email,inside resendOtp service', error )
+            } )
         ] )
         this.logger.info( `Verification OTP resent`, { email: data.email } )
         return {
@@ -170,11 +179,10 @@ export class AuthService
             throw new BadRequestException( 'OTP already used, please request a new one' )
         }
         const user = JSON.parse( cacheUser ) as RegisteruserDto
-        const hashedPassword = await hashPassword( user.password )
         const createdUser = await this.authRepository.createUser( {
             email: data.email,
             name: user.name,
-            password: hashedPassword
+            password: user.password
         } )
         if ( !createdUser )
         {
@@ -198,10 +206,13 @@ export class AuthService
             this.redisService.del( registerKey( data.email ) ),
             this.redisService.del( otpKey( data.email ) ),
             this.redisService.del( otpCooldownKey( data.email ) ),
-            /* this.mailsService.WellcomeMail( {
-                    name: createdUser.name,
-                    toEmail: createdUser.email
-                } )*/
+            this.mailsService.sendWelcomeMail( {
+                name: createdUser.name,
+                toEmail: createdUser.email
+            } ).catch( ( error ) =>
+            {
+                this.logger.error( 'Failed to send welcome email,inside verify email service', error )
+            } )
         ] )
 
 
@@ -239,6 +250,8 @@ export class AuthService
             throw new BadRequestException( 'Failed to generate token pair, please try again later' )
         }
         const { accessToken, refreshToken } = tokenPair
+
+
 
         this.logger.info( `User logged in successfully`, { email: result.email } )
         return {
@@ -325,11 +338,14 @@ export class AuthService
 
         await Promise.all( [
             this.redisService.set( resetTokenKey( hashedToken ), result.email, 60 * 10 ),
-            /*   this.mailsService.ResetPasswordMail( {
+            this.mailsService.sendResetPasswordMail( {
                 link: link,
                 toEmail: result.email,
                 name: result.name
-            } )*/
+            } ).catch( ( error ) =>
+            {
+                this.logger.error( 'Failed to send reset password email,inside forgot password service', error )
+            } )
         ] )
         this.logger.info( 'Reset password link sent', { email: result.email } )
         return response
@@ -353,7 +369,8 @@ export class AuthService
         {
             throw invalid()
         }
-        const response = await this.authRepository.updateUserPassword( result.id, data.password )
+        const hashedPassword = await hashPassword( data.password )
+        const response = await this.authRepository.updateUserPassword( result.id, hashedPassword )
         if ( !response )
         {
             throw new BadRequestException( 'Failed to reset password, please try again later' )
@@ -361,10 +378,13 @@ export class AuthService
 
         await Promise.all( [
             this.redisService.del( resetTokenKey( hashedToken ) ),
-            /* this.mailsService.PasswordChangedMail( {
-                 name: result.name,
-                 toEmail: result.email
-             } )*/
+            this.mailsService.sendPasswordChangedMail( {
+                name: result.name,
+                toEmail: result.email
+            } ).catch( ( error ) =>
+            {
+                this.logger.error( 'Failed to send password changed email,inside reset password service', error )
+            } )
         ] )
         this.logger.info( `Password reset successfully for ${ cachedEmail }` )
         return {
@@ -430,11 +450,7 @@ export class AuthService
             throw new BadRequestException( 'Failed to generate token pair, please try again later' )
         }
         const { accessToken, refreshToken } = tokenPair
-        this.logger.info( `User logged in with google`, { email: user.email } )
-        /*  await this.mailsService.WellcomeMail( {
-            name: user.name,
-            toEmail: user.email
-        } )*/
+        this.logger.info( { email: user.email }, 'User logged in with google' )
         // 10. Return response
         return {
             success: true,
@@ -443,59 +459,5 @@ export class AuthService
             refreshToken: refreshToken
         }
     }
-
-
-    async setUserImage ( @UploadedFile() file: Express.Multer.File, userId: string )
-    {
-        // const totalStart = performance.now();
-
-        // console.log( 'File received:', file.size );
-        // console.log( file );
-
-
-        const imageResult = await this.imageService.uploadImage( file, '/user-profile/image' );
-        if ( !imageResult || !imageResult.url || !imageResult.fileId )
-        {
-            throw new BadRequestException( 'Failed to upload image, please try again later' );
-        }
-
-
-        const response = await this.authRepository.setUserProfileImage( userId, imageResult.url, imageResult.fileId )
-
-        if ( !response )
-        {
-            throw new HttpException( 'Failed to set user profile image, please try again later', 500 )
-
-        }
-        return {
-            message: 'User profile image set successfully',
-            imageUrl: response.avatar
-        }
-    }
-
-
-    async deleteUserImage ( userId: string )
-    {
-        const user = await this.authRepository.findUserById( userId )
-        if ( !user )
-        {
-            throw new HttpException( 'User not found', 404 )
-        }
-        if ( !user.avatar )
-        {
-            return {
-                message: 'User profile image already deleted'
-            }
-        }
-        const response = await this.imageService.deleteImage( user.avatarId || '' )
-        if ( !response )
-        {
-            throw new HttpException( 'Failed to delete user profile image, please try again later', 500 )
-        }
-        return {
-            message: 'User profile image deleted successfully'
-        }
-    }
-
 
 }

@@ -2,10 +2,12 @@
 
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { PrismaService } from "../../prisma/prisma.service.js";
+
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from "@prisma/client/runtime/client";
-import { RegisteruserDto } from "../dto/registeruser.dto.js";
-import type { GoogleOauthBody } from "../../types/google.oauth.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { RegisteruserDto } from "../auth/dto/registeruser.dto.js";
+import { GoogleOauthBody } from "../types/google.oauth.js";
+;
 
 @Injectable()
 export class AuthRepository
@@ -171,29 +173,6 @@ export class AuthRepository
         }
     }
 
-    async setUserProfileImage ( userId: string, image: string, fileId: string )
-    {
-        try
-        {
-            return await this.prisma.user.update( {
-                where: {
-                    id: userId
-                },
-                data: {
-                    avatar: image,
-                    avatarId: fileId
-                },
-                select: {
-                    avatar: true
-                }
-            } )
-        }
-        catch ( error )
-        {
-            this.handleError( error, 'setUserProfileImage' );
-        }
-    }
-
     async googleLogin ( data: GoogleOauthBody )
     {
         try
@@ -249,5 +228,7 @@ export class AuthRepository
             this.handleError( error, 'linkWithGoogleId' );
         }
     }
+
+   
 
 }

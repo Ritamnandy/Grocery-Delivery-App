@@ -1,14 +1,13 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import type { PrismaService } from "../prisma/prisma.service.js";
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import  { PrismaService } from "../prisma/prisma.service.js";
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from "@prisma/client/runtime/client";
-import { InjectPinoLogger, type PinoLogger } from "nestjs-pino";
 
 @Injectable()
 export class UserRepository
 {
+    private readonly logger = new Logger( UserRepository.name )
 
     constructor (
-        @InjectPinoLogger( UserRepository.name ) private readonly logger: PinoLogger,
         private readonly prisma: PrismaService
     ) { }
 
@@ -92,5 +91,22 @@ export class UserRepository
         {
             this.handleError( error, 'deleteImageFormDb' );
         }
-    }       
+    }
+
+    async getUserById ( userId: string )
+    {
+        try
+        {
+            return await this.prisma.user.findUnique( {
+                where: {
+                    id: userId
+                }
+            } )
+        } catch ( error )
+        {
+            this.handleError( error, 'getUserById' );
+        }
+    }
+
+
 }

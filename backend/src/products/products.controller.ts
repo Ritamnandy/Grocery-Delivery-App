@@ -74,7 +74,7 @@ export class ProductsController
     return await this.productsService.remove( id );
   }
 
-  @Get()
+  @Get('flash-deals')
   @HttpCode( HttpStatus.OK )
   async getFlashDeals ()
   {

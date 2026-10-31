@@ -44,7 +44,7 @@ function AddressCard ( { address, onEditHandler, onDelete, onSetDefault }: Addre
 
                         { !address.isDefault && (
                             <button
-                                onClick={ () => onSetDefault( address._id ) }
+                                onClick={ () => onSetDefault( address.id ) }
                                 className="mt-3 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors cursor-pointer"
                             >
                                 Set as default
@@ -87,7 +87,7 @@ function AddressCard ( { address, onEditHandler, onDelete, onSetDefault }: Addre
                                 Cancel
                             </button>
                             <button
-                                onClick={ () => onDelete( address._id ) }
+                                onClick={ () => onDelete( address.id ) }
                                 className="px-5 py-2.5 text-sm font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors cursor-pointer"
                             >
                                 Delete

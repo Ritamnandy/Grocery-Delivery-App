@@ -1,16 +1,17 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { CartItem, Product } from "../types";
+import type { CartItem, Product } from "../types/index";
 
-interface CartContextType  {
+interface CartContextType
+{
     items: CartItem[]
-    addToCart: (item: Product, quantity?: number) => void
-    removeFromCart: (productId: string) => void
-    updateQuantity: (productId: string, quantity: number) => void
+    addToCart: ( item: Product, quantity?: number ) => void
+    removeFromCart: ( productId: string ) => void
+    updateQuantity: ( productId: string, quantity: number ) => void
     clearCart: () => void
     cartCount: number
     cartTotal: number
     isCartOpen: boolean
-    setIsCartOpen: (open: boolean) => void
+    setIsCartOpen: ( open: boolean ) => void
 };
 
 
@@ -24,17 +25,17 @@ export function CartProvider ( { children }: { children: ReactNode } )
 
     const [ items, setItems ] = useState<CartItem[]>( () =>
     {
-        const saved=localStorage.getItem("app_cart")
-        return saved ? JSON.parse(saved) : []
+        const saved = localStorage.getItem( "app_cart" )
+        return saved ? JSON.parse( saved ) : []
     } )
-    
+
     const [ isCartOpen, setIsCartOpen ] = useState( false )
-    
+
     useEffect( () =>
     {
         localStorage.setItem( "app_cart", JSON.stringify( items ) )
     }, [ items ] )
-    
+
 
     const addToCart = ( product: Product, quantity: number = 1 ) =>
     {
@@ -84,9 +85,9 @@ export function CartProvider ( { children }: { children: ReactNode } )
     const cartCount = items.reduce( ( total, item ) => total + item.quantity, 0 )
 
     const cartTotal = items.reduce( ( total, item ) => total + ( item.product.price * item.quantity ), 0 )
-    
+
     return (
-        <cartContext.Provider value={{
+        <cartContext.Provider value={ {
             items,
             addToCart,
             removeFromCart,
@@ -96,18 +97,20 @@ export function CartProvider ( { children }: { children: ReactNode } )
             cartTotal,
             isCartOpen,
             setIsCartOpen
-        }}>
-            {children}
+        } }>
+            { children }
         </cartContext.Provider>
     )
-    
+
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function useCart() {
-    const context = useContext(cartContext)
-    if (!context) {
-        throw new Error("useCart must be used within a CartProvider")
+export function useCart ()
+{
+    const context = useContext( cartContext )
+    if ( !context )
+    {
+        throw new Error( "useCart must be used within a CartProvider" )
     }
     return context
 }

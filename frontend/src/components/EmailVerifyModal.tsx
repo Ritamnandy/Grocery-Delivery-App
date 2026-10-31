@@ -1,6 +1,7 @@
 
 import { useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react"
 import Modal from "./Modal"
+import { useAuth } from "../context/authContext"
 
 type Props = {
     open: boolean
@@ -19,7 +20,7 @@ const EmailVerifyModal = ( { open, onClose, email, onVerified }: Props ) =>
     const [ loading, setLoading ] = useState( false )
     const [ cooldown, setCooldown ] = useState( RESEND_SECONDS )
     const refs = useRef<( HTMLInputElement | null )[]>( [] )
-
+    const { verifyEmail, resendOtpCode } = useAuth()
     // reset + focus when opened
     useEffect( () =>
     {
@@ -75,9 +76,14 @@ const EmailVerifyModal = ( { open, onClose, email, onVerified }: Props ) =>
         setLoading( true )
         try
         {
-            // TODO: await api.post("/auth/verify", { email, otp: code })
-            await new Promise( ( r ) => setTimeout( r, 800 ) )
-            onVerified()
+            const res = await verifyEmail( email, code )
+            if ( res )
+            {
+                onVerified()
+            } else
+            {
+                setError( "Invalid or expired code. Please try again." )
+            }
         } catch
         {
             setError( "Invalid or expired code. Please try again." )
@@ -90,11 +96,18 @@ const EmailVerifyModal = ( { open, onClose, email, onVerified }: Props ) =>
     const handleResend = async () =>
     {
         if ( cooldown > 0 ) return
-        // TODO: await api.post("/auth/resendotp", { email })
-        setDigits( Array( LENGTH ).fill( "" ) )
-        setError( "" )
-        setCooldown( RESEND_SECONDS )
-        refs.current[ 0 ]?.focus()
+        const res = await resendOtpCode( email )
+        console.log( res );
+        if ( res )
+        {
+            setDigits( Array( LENGTH ).fill( "" ) )
+            setError( "" )
+            setCooldown( RESEND_SECONDS )
+            refs.current[ 0 ]?.focus()
+        } else
+        {
+            setError( "Failed to resend code. Please try again later." )
+        }
     }
 
     return (

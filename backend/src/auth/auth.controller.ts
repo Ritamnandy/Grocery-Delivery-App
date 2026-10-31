@@ -181,12 +181,12 @@ export class AuthController
         if ( response.success )
         {
 
-            // return res.redirect( homePage );
-            return response.message;
+            return res.redirect( homePage );
+            // return response.message;
         }
 
-        // return res.redirect( errorPage );
-        return response.message;
+        return res.redirect( errorPage );
+        // return response.message;
     }
 
 

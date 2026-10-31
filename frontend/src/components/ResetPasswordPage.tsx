@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { BikeIcon, CheckCircle2Icon, LockIcon } from "lucide-react"
 import FloatingInput from "../components/FloatingInput"
+import { useAuth } from "../context/authContext"
 
 type FormValues = { password: string; confirmPassword: string }
 
@@ -14,7 +15,7 @@ const ResetPasswordPage = () =>
     const navigate = useNavigate()
     const [ done, setDone ] = useState( false )
     const [ serverError, setServerError ] = useState( "" )
-
+    const { resetPassword } = useAuth()
     const {
         register,
         handleSubmit,
@@ -25,13 +26,18 @@ const ResetPasswordPage = () =>
     const onSubmit = async ( { password }: FormValues ) =>
     {
         setServerError( "" )
-        console.log(password);
+        console.log( password );
         try
         {
-            // TODO: await api.patch("/auth/resetpassword", { token, password })
-            await new Promise( ( r ) => setTimeout( r, 800 ) )
-            setDone( true )
-            setTimeout( () => navigate( "/login" ), 2500 )
+            const res = await resetPassword( token || '', password )
+            if ( res )
+            {
+                setDone( true )
+                setTimeout( () => navigate( "/login" ), 2500 )
+            } else
+            {
+                setServerError( "This reset link is invalid or has expired." )
+            }
         } catch
         {
             setServerError( "This reset link is invalid or has expired." )

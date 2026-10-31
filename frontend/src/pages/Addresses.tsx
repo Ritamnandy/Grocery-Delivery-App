@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react"
+import { useMemo, useState } from "react"
 import { MapPinIcon, PlusIcon } from "lucide-react"
 import type { Address, formInput } from "../types"
-import { dummyAddressData } from "../assets/assets"
 import AddressCard from "../components/AddressCard"
 import AddressForm from "../components/AddressForm"
+import { useAddress } from "../context/addressContext"
 
 const emptyForm: formInput = {
     label: "",
@@ -16,12 +16,22 @@ const emptyForm: formInput = {
 
 const Addresses = () =>
 {
-    const [ addresses, setAddresses ] = useState<Address[]>( [] )
-    const [ loading, setLoading ] = useState<boolean>( true )
+    const {
+        addresses,
+        isLoading,
+        hasError,
+        addAddress,
+        updateAddress,
+        deleteAddress,
+        setDefaultAddress,
+        refetch,
+    } = useAddress()
+
     const [ showForm, setShowForm ] = useState<boolean>( false )
     const [ editingId, setEditingId ] = useState<string | null>( null )
 
-    const editingAddress = addresses.find( ( a ) => a._id === editingId )
+    const editingAddress = addresses.find( ( a ) => a.id === editingId )
+
     const defaultValues: formInput = editingAddress
         ? {
             label: editingAddress.label,
@@ -32,6 +42,12 @@ const Addresses = () =>
             isDefault: editingAddress.isDefault,
         }
         : { ...emptyForm, isDefault: addresses.length === 0 } // first address is default
+
+    // Default address first, then the rest in their original order
+    const sortedAddresses = useMemo(
+        () => [ ...addresses ].sort( ( a, b ) => Number( b.isDefault ) - Number( a.isDefault ) ),
+        [ addresses ]
+    )
 
     const closeForm = () =>
     {
@@ -45,84 +61,50 @@ const Addresses = () =>
         setShowForm( true )
     }
 
-    const onEditHandler = ( add: Address ) =>
+    const onEditHandler = ( address: Address ) =>
     {
-        setEditingId( add._id )
+        setEditingId( address.id )
         setShowForm( true )
     }
 
-    // TODO: replace the fake delay with your API calls
     const handleSave = async ( data: formInput ) =>
     {
-        await new Promise( ( r ) => setTimeout( r, 600 ) )
 
-        const savedId = editingId ?? crypto.randomUUID()
 
-        setAddresses( ( prev ) =>
-        {
-            let next: Address[] = editingId
-                ? prev.map( ( a ) => ( a._id === editingId ? { ...a, ...data } : a ) )
-                : [ ...prev, { _id: savedId, ...data, lat: 0, lng: 0 } ] // TODO: geocode lat/lng
 
-            // only one default; the very first address is always the default
-            if ( data.isDefault || next.length === 1 )
-            {
-                next = next.map( ( a ) => ( { ...a, isDefault: a._id === savedId } ) )
-            } else if ( !next.some( ( a ) => a.isDefault ) )
-            {
-                next = next.map( ( a, i ) => ( { ...a, isDefault: i === 0 } ) )
-            }
-            return next
-        } )
+        const ok = editingId
+            ? await updateAddress( editingId, data )
+            : await addAddress( data )
 
-        closeForm()
+
+        if ( ok ) closeForm() // keep the form open if the request failed
     }
 
-    const handleDelete = ( id: string ) =>
+    const handleDelete = async ( id: string ) =>
     {
-        // TODO: call your delete API
-        setAddresses( ( prev ) =>
-        {
-            const next = prev.filter( ( a ) => a._id !== id )
-            if ( next.length > 0 && !next.some( ( a ) => a.isDefault ) )
-            {
-                next[ 0 ] = { ...next[ 0 ], isDefault: true }
-            }
-            return next
-        } )
+        if ( !window.confirm( "Delete this address?" ) ) return
+        await deleteAddress( id )
     }
-
-    const handleSetDefault = ( id: string ) =>
-    {
-        // TODO: call your API
-        setAddresses( ( prev ) => prev.map( ( a ) => ( { ...a, isDefault: a._id === id } ) ) )
-    }
-
-    useEffect( () =>
-    {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setAddresses( dummyAddressData )
-        const t = setTimeout( () => setLoading( false ), 1000 )
-        return () => clearTimeout( t )
-    }, [] )
 
     return (
         <div className="min-h-screen bg-app-cream">
-            <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
 
-                {/* page Header */ }
+                {/* Page header */ }
                 <div className="flex items-center justify-between gap-4 mb-8">
                     <div>
                         <h1 className="text-2xl font-semibold text-app-green">My Addresses</h1>
-                        { !loading && addresses.length > 0 && (
+                        { !isLoading && !hasError && addresses.length > 0 && (
                             <p className="text-xs text-app-text-light mt-1">
                                 { addresses.length } saved { addresses.length === 1 ? "address" : "addresses" }
                             </p>
                         ) }
                     </div>
                     <button
+                        type="button"
                         onClick={ openAdd }
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-app-green rounded-xl hover:opacity-90 active:scale-[0.98] transition cursor-pointer"
+                        disabled={ isLoading || hasError }
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-app-green rounded-xl hover:opacity-90 active:scale-[0.98] transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <PlusIcon className="size-4" /> Add Address
                     </button>
@@ -138,11 +120,11 @@ const Addresses = () =>
                     />
                 ) }
 
-                {/* display addresses */ }
-                { loading ? (
+                {/* Addresses */ }
+                { isLoading ? (
                     <div className="space-y-4" role="status" aria-label="Loading addresses">
                         { Array.from( { length: 2 } ).map( ( _, i ) => (
-                            <div key={ i } className="max-w-3xl bg-white rounded-2xl p-6 flex items-start justify-between" aria-hidden="true">
+                            <div key={ i } className="bg-white rounded-2xl p-6 flex items-start justify-between" aria-hidden="true">
                                 <div className="flex gap-4">
                                     <div className="skeleton size-11 rounded-xl" />
                                     <div className="space-y-2.5">
@@ -158,14 +140,27 @@ const Addresses = () =>
                             </div>
                         ) ) }
                     </div>
+                ) : hasError ? (
+                    <div className="bg-white rounded-2xl text-center py-16 px-6 shadow-sm" role="alert">
+                        <h2 className="text-app-green text-lg font-semibold mb-1">Couldn't load your addresses</h2>
+                        <p className="text-app-text-light text-sm mb-6">Check your connection and try again.</p>
+                        <button
+                            type="button"
+                            onClick={ refetch }
+                            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-app-green rounded-xl hover:opacity-90 transition cursor-pointer"
+                        >
+                            Try again
+                        </button>
+                    </div>
                 ) : addresses.length === 0 ? (
-                    <div className="max-w-3xl bg-white rounded-2xl text-center py-16 px-6 shadow-sm">
+                    <div className="bg-white rounded-2xl text-center py-16 px-6 shadow-sm">
                         <div className="size-16 mx-auto mb-4 rounded-full bg-app-green/10 text-app-green flex-center">
                             <MapPinIcon className="size-8" />
                         </div>
                         <h2 className="text-app-green text-lg font-semibold mb-1">No addresses saved yet</h2>
                         <p className="text-app-text-light text-sm mb-6">Add an address for faster checkout</p>
                         <button
+                            type="button"
                             onClick={ openAdd }
                             className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-app-green rounded-xl hover:opacity-90 transition cursor-pointer"
                         >
@@ -174,13 +169,13 @@ const Addresses = () =>
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        { addresses.map( ( address ) => (
+                        { sortedAddresses.map( ( address ) => (
                             <AddressCard
-                                key={ address._id }
+                                key={ address.id }
                                 address={ address }
                                 onEditHandler={ onEditHandler }
                                 onDelete={ handleDelete }
-                                onSetDefault={ handleSetDefault }
+                                onSetDefault={ setDefaultAddress }
                             />
                         ) ) }
                     </div>

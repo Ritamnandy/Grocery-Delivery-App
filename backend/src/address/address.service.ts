@@ -4,6 +4,7 @@ import { UpdateAddressDto } from './dto/update-address.dto.js';
 import { AddressRepository } from '../repository/address.repository.js';
 import { RedisService } from '../redis/redis.service.js';
 import { getUserAddressesKey } from '../utils/redis.key.js';
+import type { SetDefaultDto } from './dto/setdefault.dto.js';
 
 @Injectable()
 export class AddressService
@@ -85,4 +86,19 @@ export class AddressService
       message: 'Address deleted successfully',
     };
   }
+
+  async setDefault ( addressId: string, setDefaultDto: SetDefaultDto )
+  {
+    const response = await this.addressRepository.setDefaultAddress( addressId, setDefaultDto.isDefault );
+    if ( !response )
+    {
+      this.logger.error( 'Failed to set default address' );
+      throw new BadRequestException( 'Failed to set default address, please try again later' );
+    }
+    await this.redisService.del( getUserAddressesKey( response.userId ) );
+    return {
+      message: 'Default address set successfully',
+    };
+  }
+  
 }

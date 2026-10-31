@@ -54,7 +54,7 @@ export class AddressRepository
     {
         try
         {
-            return await this.prisma.address.create( { data: { ...data, userId } } );
+            return await this.prisma.address.create( { data: { ...data,lat:0,lng:0, userId } } );
         }
         catch ( error )
         {
@@ -110,5 +110,16 @@ export class AddressRepository
         }
     }
 
+    async setDefaultAddress ( addressId: string, isDefault: boolean )
+    {
+        try
+        {
+            return await this.prisma.address.update( { where: { id: addressId }, data: { isDefault } } );
+        }
+        catch ( error )
+        {
+            this.handleError( error, 'setDefaultAddress' );
+        }
+    }
 
 }

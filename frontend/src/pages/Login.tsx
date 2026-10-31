@@ -8,6 +8,8 @@ import { BikeIcon, LockIcon, MailIcon, UserIcon } from "lucide-react"
 import FloatingInput from "../components/FloatingInput"
 import ForgotPasswordModal from "../components/ForgotPasswordModal"
 import EmailVerifyModal from "../components/EmailVerifyModal"
+import { useAuth } from "../context/authContext"
+import { toast } from "react-hot-toast"
 
 type FormValues = {
     name?: string
@@ -15,7 +17,7 @@ type FormValues = {
     password: string
 }
 
-const GOOGLE_URL = `${ import.meta.env.VITE_API_URL }/auth/google` // change to your backend's Google route
+
 
 const Login = () =>
 {
@@ -23,6 +25,8 @@ const Login = () =>
     const [ showForgot, setShowForgot ] = useState( false )
     const [ showVerify, setShowVerify ] = useState( false )
     const [ pendingEmail, setPendingEmail ] = useState( "" )
+    const GOOGLE_URL = `${ import.meta.env.VITE_API_URL }/auth/google`
+    const { login, register: registerUser } = useAuth()
 
     const navigate = useNavigate()
 
@@ -36,16 +40,33 @@ const Login = () =>
 
     const onSubmit = async ( data: FormValues ) =>
     {
-        // TODO: call your real login / signup API here
-        await new Promise( ( r ) => setTimeout( r, 1000 ) )
+
 
         if ( isLoginState )
         {
-            navigate( "/" )
+            const response = await login( data.email, data.password )
+            if ( response )
+            {
+                navigate( "/" )
+            } else
+            {
+                // TODO: show error message
+                toast.error( "Login failed, please check your credentials" )
+            }
+
         } else
         {
-            setPendingEmail( data.email )
-            setShowVerify( true ) // backend has emailed the OTP
+            console.log('register user call');
+            
+            const response1 = await registerUser( { name: data.name || "", email: data.email, password: data.password } )
+            if ( response1 )
+            {
+                setPendingEmail( data.email )
+                setShowVerify( true )
+            } else
+            {
+                toast.error( "Registration failed, please try again" )
+            }
         }
     }
 

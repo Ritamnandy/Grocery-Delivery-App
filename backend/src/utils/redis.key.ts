@@ -32,6 +32,10 @@ const getUserAddressesKey = ( userId: string ) =>
 {
     return `user-addresses:${ userId }`
 }
+const userCacheKey = ( userId: string ) =>
+{
+    return `user:${ userId }`;
+}
 
 const OTP_RESEND_COOLDOWN = 60; // 1 minute
 const OTP_EXPIRY = 5 * 60;
@@ -56,5 +60,6 @@ export
     RESET_TOKEN_EXPIRY,
     FlashDealsKey,
     getAllProductsKey,
-    getUserAddressesKey
+    getUserAddressesKey,
+    userCacheKey
 }

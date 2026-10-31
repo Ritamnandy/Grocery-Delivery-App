@@ -7,7 +7,7 @@ import { StringValue } from 'ms';
 import type { JwtPayload, JwtRefreshPayload } from '../types/payload.types.js';
 import { RegisteruserDto } from './dto/registeruser.dto.js';
 import { comparePassword, createHashData, createRowToken, generateOtp, hashPassword, ResetPasswordLink, safeEqual } from '../utils/constants.js';
-import { OTP_EXPIRY, OTP_RESEND_COOLDOWN, otpCooldownKey, otpKey, profileKey, REGISTER_DATA_EXPIRY, registerKey, resetTokenKey } from '../utils/redis.key.js';
+import { OTP_EXPIRY, OTP_RESEND_COOLDOWN, otpCooldownKey, otpKey, REGISTER_DATA_EXPIRY, registerKey, resetTokenKey, userCacheKey } from '../utils/redis.key.js';
 import { ResendcodeDto } from './dto/resendcode.dto.js';
 import { VerifyuserDto } from './dto/verifyuser.dto.js';
 import { LoginuserDto } from './dto/loginuser.dto.js';
@@ -32,7 +32,7 @@ export class AuthService
 
     private async clearUserProfileCache ( userId: string )
     {
-        await this.redisService.del( profileKey( userId ) )
+        await this.redisService.del( userCacheKey( userId ) )
     }
 
     private createPayLoad ( payload: JwtRefreshPayload ): { jwt: JwtPayload, refresh: JwtRefreshPayload }

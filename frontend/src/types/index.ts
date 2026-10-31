@@ -11,7 +11,7 @@ export interface User {
 }
 
 export interface Address {
-    _id: string;
+    id: string;
     label: string;
     address: string;
     city: string;

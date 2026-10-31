@@ -5,8 +5,7 @@ import type { Address } from '../../types';
 
 const CheckoutAddress = ( { user, address, setAddress, setStep }: { user: any; address: Address; setAddress: ( address: Address ) => void; setStep: ( step: string ) => void } ) =>
 {
-    console.log(user);
-    
+      
     return (
         <div className="bg-white rounded-2xl p-6 animate-fade-in">
             <h2 className="text-lg font-semibold text-app-green mb-5 flex items-center gap-2">
@@ -18,7 +17,7 @@ const CheckoutAddress = ( { user, address, setAddress, setStep }: { user: any; a
                     <div className="grid sm:grid-cols-2 gap-3">
                         {user.addresses.map((addr: Address) => (
                             <div
-                                key={addr._id || addr.label}
+                                key={addr.id || addr.label}
                                 onClick={() => setAddress({
                                     label: addr.label,
                                     address: addr.address,
@@ -27,7 +26,7 @@ const CheckoutAddress = ( { user, address, setAddress, setStep }: { user: any; a
                                     zip: addr.zip,
                                     lat: addr.lat,
                                     lng: addr.lng,
-                                    _id: addr._id,
+                                    id: addr.id,
                                     isDefault: addr.isDefault
                                 })}
                                 className={`p-4 rounded-xl border cursor-pointer transition-colors ${address.label === addr.label && address.address === addr.address ? 'border-app-green bg-app-cream' : 'border-app-border hover:bg-app-cream'}`}

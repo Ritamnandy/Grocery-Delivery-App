@@ -5,6 +5,7 @@ import { MailIcon, CheckCircle2Icon } from "lucide-react"
 import Modal from "./Modal"
 import FloatingInput from "./FloatingInput"
 import { maskEmail } from "../utils/maskEmail"
+import { useAuth } from "../context/authContext"
 
 type Props = { open: boolean; onClose: () => void; defaultEmail?: string }
 type FormValues = { email: string }
@@ -13,6 +14,7 @@ const ForgotPasswordModal = ( { open, onClose, defaultEmail = "" }: Props ) =>
 {
     const [ sent, setSent ] = useState( false )
     const [ serverError, setServerError ] = useState( "" )
+    const { forgotPassword } = useAuth()
 
     const {
         register,
@@ -31,12 +33,14 @@ const ForgotPasswordModal = ( { open, onClose, defaultEmail = "" }: Props ) =>
     const onSubmit = async ( { email }: FormValues ) =>
     {
         setServerError( "" )
-        console.log(email);
         try
         {
-            // TODO: await api.post("/auth/forgotpassword", { email })
-            await new Promise( ( r ) => setTimeout( r, 800 ) )
-            setSent( true )
+            const res = await forgotPassword(email)
+            if (res) {
+                setSent( true )
+            } else {
+                setServerError( "Something went wrong. Please try again." )
+            }
         } catch ( err )
         {
             console.log(err);

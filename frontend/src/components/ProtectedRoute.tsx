@@ -1,19 +1,13 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Loading from "./Loading";
 import { useEffect } from "react";
+import { useAuth } from "../context/authContext";
 
 
 
 export default function ProtectedRoute ()
 {
-    const { user, loading } = {
-        user: {
-            name: "John Doe",
-            email: "john.doe@example.com",
-            isAdmin: true
-        },
-        loading: false,
-    }
+    const { isAuthenticated, isLoading } = useAuth()
     const location = useLocation()
 
     useEffect( () =>
@@ -25,13 +19,13 @@ export default function ProtectedRoute ()
 
         }, 1000 )
         return () => clearTimeout( timer )
-    }, [ loading ] )
+    }, [ isLoading ] )
 
     // still checking the session (e.g. cookie / refresh token), so don't redirect yet
-    if ( loading ) return <Loading fullScreen />
+    if ( isLoading ) return <Loading fullScreen />
 
     // not logged in: go to login and remember where they were headed
-    if ( !user )
+    if ( !isAuthenticated )
     {
         return <Navigate to="/login" replace state={ { from: location } } />
     }

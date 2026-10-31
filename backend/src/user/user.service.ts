@@ -2,16 +2,14 @@ import { BadRequestException, ConflictException, Injectable, Logger, NotFoundExc
 import { UserRepository } from '../repository/user.repository.js';
 import { ImageService } from '../image/image.service.js';
 import { RedisService } from '../redis/redis.service.js';
+import { userCacheKey } from '../utils/redis.key.js';
 
 @Injectable()
 export class UserService
 {
     private readonly logger = new Logger( UserService.name )
     private readonly userCacheTTL = 60 * 10; // 10 minutes
-    private userCacheKey ( userId: string )
-    {
-        return `user:${ userId }`;
-    }
+    
     constructor (
         private readonly userRepository: UserRepository,
         private readonly imageService: ImageService,
@@ -20,7 +18,7 @@ export class UserService
 
     async gerCurrentUser ( userId: string )
     {
-        const cachedUser = await this.redisService.get( this.userCacheKey( userId ) )
+        const cachedUser = await this.redisService.get( userCacheKey( userId ) )
         if ( cachedUser )
         {
             this.logger.log( `User found in cache: ${ userId }` )
@@ -36,17 +34,17 @@ export class UserService
             throw new NotFoundException( 'User with this ID not found' )
         }
         this.logger.log( `User found: ${ response.name }` )
-        const user = {
+        const data = {
             id: response.id,
             name: response.name,
             email: response.email,
             role: response.role,
             avatar: response.avatar
         }
-        await this.redisService.set( this.userCacheKey( userId ), JSON.stringify( user ), this.userCacheTTL )
+        await this.redisService.set( userCacheKey( userId ), JSON.stringify( data ), this.userCacheTTL )
         return {
             message: 'User found',
-            user: user
+            data
         }
     }
 
@@ -65,7 +63,7 @@ export class UserService
             throw new BadRequestException( 'Failed to set user profile image, please try again later' )
 
         }
-        await this.redisService.del( this.userCacheKey( userId ) )
+        await this.redisService.del( userCacheKey( userId ) )
         return {
             message: 'User profile image set successfully',
         }

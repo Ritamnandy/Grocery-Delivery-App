@@ -7,6 +7,8 @@ import
 } from "lucide-react"
 import { getUserName } from "../utils/userName"
 import { useCart } from "../context/cartContext"
+import { useAuth } from "../context/authContext"
+
 
 const MenuLink = [
     { to: "/", label: "Home" },
@@ -22,11 +24,8 @@ const dropdownLink =
 
 const NavBar = () =>
 {
-    const user = {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        isAdmin: true
-    }
+
+    const { user, logout } = useAuth()
 
     const { cartCount, setIsCartOpen } = useCart()
 
@@ -83,10 +82,14 @@ const NavBar = () =>
         closeSearch()
     }
 
-    const handleLogout = () =>
+    const handleLogout = async () =>
     {
-        setUserMenuOpen( false )
-        navigate( "/" )
+        const res = await logout()
+        if ( res )
+        {
+            setUserMenuOpen( false )
+            navigate( "/" )
+        }
         console.log( "Logout" )
     }
 
@@ -183,18 +186,22 @@ const NavBar = () =>
                     </button>
 
                     {/* Cart */ }
-                    <button
-                        className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                        onClick={ () => setIsCartOpen( true ) }
-                        aria-label="Open cart"
-                    >
-                        <ShoppingCartIcon className="size-5 text-zinc-700" />
-                        { cartCount > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-app-orange text-white text-[10px] font-medium rounded-full flex-center">
-                                { cartCount }
-                            </span>
-                        ) }
-                    </button>
+                    {
+                        user?.role === 'user' && (
+                            <button
+                                className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                onClick={ () => setIsCartOpen( true ) }
+                                aria-label="Open cart"
+                            >
+                                <ShoppingCartIcon className="size-5 text-zinc-700" />
+                                { cartCount > 0 && (
+                                    <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-app-orange text-white text-[10px] font-medium rounded-full flex-center">
+                                        { cartCount }
+                                    </span>
+                                ) }
+                            </button>
+                        )
+                    }
 
                     {/* User / menu trigger + dropdown */ }
                     <div className="relative">
@@ -206,7 +213,11 @@ const NavBar = () =>
                                 aria-expanded={ userMenuOpen }
                             >
                                 <div className="size-8 rounded-full bg-app-green text-white text-sm font-medium flex-center">
-                                    { getUserName(user.name) }
+                                    {
+                                        user.avatar ? (
+                                            <img src={ user.avatar } alt="User avatar" className="size-8 rounded-full" />
+                                        ) : getUserName( user.name )
+                                    }
                                 </div>
                                 <ChevronDownIcon
                                     className={ `size-3.5 text-zinc-500 transition-transform duration-300 ${ userMenuOpen ? "rotate-180" : "" }` }
@@ -286,7 +297,7 @@ const NavBar = () =>
                                     </Link>
                                 ) ) }
 
-                                { user?.isAdmin && (
+                                { user?.role === 'admin' && (
                                     <Link to="/admin" className={ dropdownLink }>
                                         <ShieldIcon className="size-4" />
                                         <span className="text-app-orange-dark">Admin Panel</span>

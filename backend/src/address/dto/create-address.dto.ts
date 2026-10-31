@@ -30,13 +30,13 @@ export class CreateAddressDto
     @IsBoolean()
     isDefault: boolean;
 
-    @IsNotEmpty()
-    @Type( () => Number )
-    @IsNumber()
-    lat: number;
+    // @IsNotEmpty()
+    // @Type( () => Number )
+    // @IsNumber()
+    // lat: number;
 
-    @IsNotEmpty()
-    @Type( () => Number )
-    @IsNumber()
-    lng: number;
+    // @IsNotEmpty()
+    // @Type( () => Number )
+    // @IsNumber()
+    // lng: number;
 }

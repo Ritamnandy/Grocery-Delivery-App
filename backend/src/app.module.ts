@@ -20,6 +20,8 @@ import { AppController } from './app.controller.js';
 import { LoggerModule } from 'nestjs-pino';
 import { isProduction, loggerConfig } from './logger/logger.config.js';
 import { UserModule } from './user/user.module.js';
+import { ProductsModule } from './products/products.module.js';
+import { AddressModule } from './address/address.module.js';
 
 @Module( {
   imports: [
@@ -64,6 +66,8 @@ import { UserModule } from './user/user.module.js';
     ImageModule,
     RepositoryModule,
     UserModule,
+    ProductsModule,
+    AddressModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

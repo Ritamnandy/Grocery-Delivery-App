@@ -1,12 +1,12 @@
 // src/common/interceptors/transform.interceptor.ts
 import
-  {
-    CallHandler,
-    ExecutionContext,
-    Injectable,
-    NestInterceptor,
-    StreamableFile,
-  } from '@nestjs/common';
+{
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  StreamableFile,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 import { Observable } from 'rxjs';
@@ -68,17 +68,21 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
         let meta: Record<string, unknown> | undefined;
         let message = customMessage ?? DEFAULT_MESSAGES[ req.method ] ?? 'Success';
 
-        // Paginated result: return { data: [...], meta: {...} } from your service
+        // Paginated result
         if ( payload && typeof payload === 'object' && 'data' in payload && 'meta' in payload )
         {
           data = ( payload as any ).data;
           meta = ( payload as any ).meta;
         }
-        // Handler wants to set the message itself: return { message, data }
-        else if ( payload && typeof payload === 'object' && 'message' in payload && 'data' in payload )
+        // Handler sets its own message
+        else if ( payload && typeof payload === 'object' && 'message' in payload )
         {
-          message = ( payload as any ).message;
-          data = ( payload as any ).data;
+          const { message: msg, data: innerData, ...rest } = payload as any;
+          message = msg;
+          // use `data` if provided, otherwise keep any other extra fields, otherwise null
+          data = innerData !== undefined
+            ? innerData
+            : Object.keys( rest ).length ? rest : null;
         }
 
         return {

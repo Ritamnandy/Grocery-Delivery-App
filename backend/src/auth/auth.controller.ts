@@ -90,7 +90,7 @@ export class AuthController
         // console.log( result );
 
         this.setAuthCookies( res, result.accessToken ?? '', result.refreshToken ?? '' );
-        return { message: result.message };
+        return { message: result.message, data: result.data };
     }
 
 
@@ -107,7 +107,7 @@ export class AuthController
     {
         const result = await this.authService.loginUser( data );
         this.setAuthCookies( res, result.accessToken ?? '', result.refreshToken ?? '' );
-        return { message: result.message };
+        return { message: result.message, data: result.data };
     }
 
 

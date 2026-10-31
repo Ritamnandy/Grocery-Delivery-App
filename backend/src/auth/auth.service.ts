@@ -219,6 +219,13 @@ export class AuthService
         this.logger.log( "User registered successfully", { email: createdUser.email } )
         return {
             message: 'User registered successfully',
+            data: {
+                id: createdUser.id,
+                name: createdUser.name,
+                email: createdUser.email,
+                role: createdUser.role,
+                avatar: createdUser.avatar
+            },
             accessToken: accessToken,
             refreshToken: refreshToken
         }
@@ -256,6 +263,13 @@ export class AuthService
         this.logger.log( `User logged in successfully`, { email: result.email } )
         return {
             message: 'User logged in successfully',
+            data: {
+                id: result.id,
+                name: result.name,
+                email: result.email,
+                role: result.role,
+                avatar: result.avatar
+            },
             accessToken: accessToken!,
             refreshToken: refreshToken!
         }
@@ -465,6 +479,13 @@ export class AuthService
         return {
             success: true,
             message: 'User logged in successfully',
+            data: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                avatar: user.avatar
+            },
             accessToken: accessToken,
             refreshToken: refreshToken
         }

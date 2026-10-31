@@ -25,6 +25,14 @@ const otpCooldownKey = ( email: string ) =>
     return `otp-cooldown:${ email }`
 }
 
+const FlashDealsKey = 'flash-deals-products'
+const getAllProductsKey = 'all-products'
+
+const getUserAddressesKey = ( userId: string ) =>
+{
+    return `user-addresses:${ userId }`
+}
+
 const OTP_RESEND_COOLDOWN = 60; // 1 minute
 const OTP_EXPIRY = 5 * 60;
 
@@ -45,5 +53,8 @@ export
     OTP_EXPIRY,
     REGISTER_DATA_EXPIRY,
     PROFILE_DATA_EXPIRY,
-    RESET_TOKEN_EXPIRY
+    RESET_TOKEN_EXPIRY,
+    FlashDealsKey,
+    getAllProductsKey,
+    getUserAddressesKey
 }

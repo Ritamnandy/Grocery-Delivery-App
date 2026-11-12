@@ -7,9 +7,10 @@ import
     } from "lucide-react"
 import { useCart } from "../context/cartContext"
 import type { Product } from "../types"
-import { categoriesData, dummyProducts } from "../assets/assets"
+import { categoriesData } from "../assets/assets"
 import ProductsCard from "../components/ProductsCard"
 import ProductsGridSkeleton from "../components/ProductsGridSkeleton"
+import { api } from "../config/api.config"
 
 // Dummy reviews until you have a reviews API
 const REVIEWS = [
@@ -78,29 +79,36 @@ const ProductsPage = () =>
     const [ localQuantity, setLocalQuantity ] = useState<number>( 1 )
     const [ added, setAdded ] = useState( false )
 
-    const fetchProduct = () =>
+    const fetchProduct = async () =>
     {
         setLoading( true )
-        const found = dummyProducts.find( ( p ) => p._id === id ) || null
-        setProduct( found )
+        try
+        {
+            const res = await api<Product[]>( "/products", { silent: true } )
+            const all = res.data ?? []
+            const found = all.find( ( p ) => p.id === id ) || null
+            setProduct( found )
 
-        // same category first, then fill up with others
-        const others = dummyProducts.filter( ( p ) => p._id !== id )
-        const sameCategory = others.filter( ( p ) => found && p.category === found.category )
-        const rest = others.filter( ( p ) => !( found && p.category === found.category ) )
-        setRelatedProducts( [ ...sameCategory, ...rest ].slice( 0, 5 ) )
+            // same category first, then fill up with others
+            const others = all.filter( ( p ) => p.id !== id )
+            const sameCategory = others.filter( ( p ) => found && p.category === found.category )
+            const rest = others.filter( ( p ) => !( found && p.category === found.category ) )
+            setRelatedProducts( [ ...sameCategory, ...rest ].slice( 0, 5 ) )
 
-        setLocalQuantity( 1 )
-        setAdded( false )
+            setLocalQuantity( 1 )
+            setAdded( false )
+        } catch
+        {
+            setProduct( null )
+            setRelatedProducts( [] )
+        }
+        setLoading( false )
     }
 
     useEffect( () =>
     {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchProduct()
         window.scrollTo( 0, 0 )
-        const t = setTimeout( () => setLoading( false ), 1000 )
-        return () => clearTimeout( t )
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ id ] )
 
@@ -326,7 +334,7 @@ const ProductsPage = () =>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                            { relatedProducts.map( ( p ) => <ProductsCard key={ p._id } product={ p } /> ) }
+                            { relatedProducts.map( ( p ) => <ProductsCard key={ p.id } product={ p } /> ) }
                         </div>
                     </section>
                 ) }

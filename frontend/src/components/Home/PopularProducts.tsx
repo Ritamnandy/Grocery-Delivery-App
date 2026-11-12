@@ -54,7 +54,7 @@ function PopularProducts ()
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5  gap-4 xl:gap-8">
                     {
                         products.map( ( product, index ) => (
-                            <StaggerItem key={ product._id } index={ index }>
+                            <StaggerItem key={ product.id } index={ index }>
                                 <ProductsCard product={ product } />
                             </StaggerItem>
                         ) )

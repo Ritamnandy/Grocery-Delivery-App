@@ -20,7 +20,7 @@ function ProductsCard ( { product }: Props )
     return (
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm ring-1 ring-black/3 hover:shadow-xl hover:shadow-app-green/10 hover:-translate-y-1 transition-all duration-300 group cursor-pointer" onClick={ () =>
         {
-            navigate( `/products/${ product._id }` )
+            navigate( `/products/${ product.id }` )
             scrollTo( 0, 0 )
         } }>
             {/* Image */ }

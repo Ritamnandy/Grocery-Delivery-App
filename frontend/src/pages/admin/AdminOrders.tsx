@@ -1,57 +1,96 @@
-import { useState, useEffect } from "react";
-import { TruckIcon } from "lucide-react";
-import toast from "react-hot-toast";
-import type { DeliveryPartner } from "../../types";
-import Loading from "../../components/Loading";
-import { dummyDashboardOrdersData, dummyDeliveryPartnerData } from "../../assets/assets";
+import { useState, useEffect } from "react"
+import { TruckIcon } from "lucide-react"
+import toast from "react-hot-toast"
+import type { DeliveryPartner } from "../../types"
+import Loading from "../../components/Loading"
+import { api } from "../../config/api.config"
 
-export default function AdminOrders() {
+const statusOptions = [ "Placed", "Confirmed", "Assigned", "Packed", "Out for Delivery", "Delivered", "Cancelled" ]
+const statusColors: Record<string, string> = {
+    Placed: "bg-blue-100 text-blue-800",
+    Confirmed: "bg-amber-100 text-amber-800",
+    Assigned: "bg-indigo-100 text-indigo-800",
+    Packed: "bg-cyan-100 text-cyan-800",
+    "Out for Delivery": "bg-purple-100 text-purple-800",
+    Delivered: "bg-green-100 text-green-800",
+    Cancelled: "bg-red-100 text-red-800",
+}
 
-    const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "$";
+export default function AdminOrders ()
+{
+    const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "$"
 
-    const [orders, setOrders] = useState<any[]>([]);
-    const [partners, setPartners] = useState<DeliveryPartner[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [assignModal, setAssignModal] = useState<string | null>(null);
-    const [selectedPartner, setSelectedPartner] = useState("");
+    const [orders, setOrders] = useState<any[]>([])
+    const [partners, setPartners] = useState<DeliveryPartner[]>([])
+    const [loading, setLoading] = useState(true)
+    const [assignModal, setAssignModal] = useState<string | null>(null)
+    const [selectedPartner, setSelectedPartner] = useState("")
 
-    const fetchOrders = async () => {
-        setOrders(dummyDashboardOrdersData)
-        setTimeout(() => setLoading(false), 1000)
-    };
+    const fetchOrders = async () =>
+    {
+        try
+        {
+            const res = await api<any[]>( "/orders/admin/all", { silent: true } )
+            setOrders( res.data ?? [] )
+        } catch
+        {
+            setOrders( [] )
+        }
+        setLoading( false )
+    }
 
-    const fetchPartners = async () => {
-        setPartners(dummyDeliveryPartnerData as any)
-        setTimeout(() => setLoading(false), 1000)
-    };
+    const fetchPartners = async () =>
+    {
+        try
+        {
+            const res = await api<DeliveryPartner[]>( "/delivery/partners", { silent: true } )
+            setPartners( res.data ?? [] )
+        } catch
+        {
+            setPartners( [] )
+        }
+    }
 
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        fetchOrders();
-        fetchPartners();
-    }, []);
+    useEffect( () =>
+    {
+        fetchOrders()
+        fetchPartners()
+    }, [])
 
-    const handleStatusChange = async (id: string, newStatus: string) => {
-        console.log(id, newStatus);
-    };
+    const handleStatusChange = async (id: string, newStatus: string) =>
+    {
+        try
+        {
+            await api( `/orders/${ id }/status`, {
+                method: "PATCH",
+                body: { status: newStatus },
+                successMessage: "Order status updated",
+            } )
+            fetchOrders()
+        } catch
+        {
+            // api() already showed the error toast
+        }
+    }
 
-    const handleAssign = async () => {
-        if (!assignModal || !selectedPartner) return;
-        toast.success("Delivery partner assigned!");
-        setAssignModal(null);
-        setSelectedPartner("");
-    };
-
-    const statusOptions = ["Placed", "Confirmed", "Assigned", "Packed", "Out for Delivery", "Delivered", "Cancelled"];
-    const statusColors: Record<string, string> = {
-        Placed: "bg-blue-100 text-blue-800",
-        Confirmed: "bg-amber-100 text-amber-800",
-        Assigned: "bg-indigo-100 text-indigo-800",
-        Packed: "bg-cyan-100 text-cyan-800",
-        "Out for Delivery": "bg-purple-100 text-purple-800",
-        Delivered: "bg-green-100 text-green-800",
-        Cancelled: "bg-red-100 text-red-800",
-    };
+    const handleAssign = async () =>
+    {
+        if ( !assignModal || !selectedPartner ) return
+        try
+        {
+            await api( `/orders/${ assignModal }/assign-partner`, {
+                method: "PATCH",
+                body: { partnerId: selectedPartner },
+                successMessage: "Delivery partner assigned!",
+            } )
+            setAssignModal( null )
+            setSelectedPartner( "" )
+            fetchOrders()
+        } catch
+        {
+            // api() already showed the error toast
+        }
+    }
 
     if (loading) return <Loading fullScreen />
 
@@ -78,38 +117,41 @@ export default function AdminOrders() {
                                     <td colSpan={5} className="px-6 py-8 text-center text-zinc-500">No orders found.</td>
                                 </tr>
                             ) : (
-                                orders.map((order: any) => (
-                                    <tr key={order._id} className="hover:bg-zinc-50/50 transition-colors">
+                                orders.map((order) => (
+                                    <tr key={order.id} className="bg-white">
                                         <td className="px-6 py-4">
-                                            <p className="font-semibold text-zinc-900">#{order._id.slice(-6)}</p>
-                                            <p className="text-xs text-zinc-500">{new Date(order.createdAt).toLocaleString()}</p>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-mono text-zinc-500">#{order.id.slice(-6).toUpperCase()}</span>
+                                                <p className="text-xs text-app-text-light mt-1">{order.createdAt ? order.createdAt.slice(0, 10) : ""}</p>
+                                            </div>
+                                            <div className="mt-2 space-y-1">
+                                                {(order.items ?? []).slice(0, 3).map((it: any, i: number) => (
+                                                    <div key={i} className="flex items-center gap-2">
+                                                        <img src={it.image ?? ""} alt={it.name} className="size-5 shrink-0 rounded object-contain" />
+                                                        <span className="text-xs text-zinc-600 truncate max-w-[120px]">{it.name ?? ""}</span>
+                                                    </div>
+                                                ))}
+                                                {(order.items ?? []).length > 3 && <span className="text-xs text-zinc-400">+{(order.items as any[]).length - 3} more</span>}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="font-medium text-zinc-900">{order.user?.name || "Unknown User"}</p>
-                                            <p className="text-xs text-zinc-500">{order.user?.email || "No email"}</p>
+                                            <p className="text-sm font-medium text-zinc-900">{typeof order.user === "string" ? "Customer" : order.user?.name ?? "Customer"}</p>
+                                            <p className="text-xs text-zinc-500">{typeof order.user === "string" ? "" : order.user?.email ?? ""}</p>
                                         </td>
-                                        <td className="px-6 py-4 font-medium">{currency}{order.total.toFixed(2)}</td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm font-semibold text-zinc-800">{currency}{Number(order.total ?? 0).toFixed(2)}</span>
+                                        </td>
                                         <td className="px-6 py-4">
                                             {order.deliveryPartner ? (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="size-6 rounded-full bg-app-green flex-center">
-                                                        <span className="text-white text-[10px] font-semibold">{order.deliveryPartner.name?.charAt(0)}</span>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-xs font-medium text-zinc-900">{order.deliveryPartner.name}</p>
-                                                        <p className="text-[10px] text-zinc-500">{order.deliveryPartner.phone}</p>
-                                                    </div>
-                                                </div>
+                                                <span className="text-sm text-zinc-600">{order.deliveryPartner.name}</span>
                                             ) : (
-                                                <button onClick={() => { setAssignModal(order._id); setSelectedPartner(""); }} className="px-3 py-1.5 text-xs font-medium bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors flex items-center gap-1">
-                                                    <TruckIcon className="size-3" /> Assign
-                                                </button>
+                                                <span className="text-xs text-zinc-400">Unassigned</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
                                             <select
                                                 value={order.status}
-                                                onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                                                onChange={(e) => handleStatusChange(order.id, e.target.value)}
                                                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold border-r-8 border-transparent outline-none cursor-pointer leading-tight ${statusColors[order.status] || "bg-zinc-100 text-zinc-800"}`}
                                             >
                                                 {statusOptions.map((s) => (<option key={s} value={s}>{s}</option>))}
@@ -135,8 +177,8 @@ export default function AdminOrders() {
                             ) : (
                                 <div className="space-y-2 mb-5 max-h-60 overflow-y-auto">
                                     {partners.map((p) => (
-                                        <label key={p._id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedPartner === p._id ? "border-app-green bg-app-green/5" : "border-app-border hover:bg-app-cream"}`}>
-                                            <input type="radio" name="partner" value={p._id} checked={selectedPartner === p._id} onChange={() => setSelectedPartner(p._id)} className="text-app-green" />
+                                        <label key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedPartner === p.id ? "border-app-green bg-app-green/5" : "border-app-border hover:bg-app-cream"}`}>
+                                            <input type="radio" name="partner" value={p.id} checked={selectedPartner === p.id} onChange={() => setSelectedPartner(p.id)} className="text-app-green" />
                                             <div className="size-8 rounded-full bg-app-green flex-center">
                                                 <span className="text-white text-xs font-semibold">{p.name.charAt(0)}</span>
                                             </div>
@@ -149,13 +191,17 @@ export default function AdminOrders() {
                                 </div>
                             )}
                             <div className="flex gap-2">
-                                <button onClick={() => setAssignModal(null)} className="flex-1 py-2.5 text-sm font-medium text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors">Cancel</button>
-                                <button onClick={handleAssign} disabled={!selectedPartner} className="flex-1 py-2.5 text-sm font-medium text-white bg-app-green rounded-xl hover:bg-app-green-light transition-colors disabled:opacity-50">Assign</button>
+                                <button onClick={() => setAssignModal(null)} className="flex-1 py-2.5 text-sm font-medium text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors">
+                                    Cancel
+                                </button>
+                                <button onClick={handleAssign} disabled={!selectedPartner} className="flex-1 py-2.5 text-sm font-medium text-white bg-app-green rounded-xl hover:bg-app-green-light transition-colors disabled:opacity-50">
+                                    Assign
+                                </button>
                             </div>
                         </div>
                     </div>
                 </>
             )}
         </>
-    );
+    )
 }

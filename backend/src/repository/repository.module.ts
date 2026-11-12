@@ -4,11 +4,12 @@ import { UserRepository } from './user.repository.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { AddressRepository } from './address.repository.js';
 import { ProductsRepository } from './products.repository.js';
+import { OrderRepository } from './order.repository.js';
 
 @Module( {
   imports: [ PrismaModule ],
   controllers: [],
-  providers: [  AuthRepository, UserRepository, AddressRepository,ProductsRepository ],
-  exports: [ AuthRepository, UserRepository, AddressRepository,ProductsRepository ]
+  providers: [  AuthRepository, UserRepository, AddressRepository, ProductsRepository, OrderRepository ],
+  exports: [ AuthRepository, UserRepository, AddressRepository, ProductsRepository, OrderRepository ]
 } )
 export class RepositoryModule { }

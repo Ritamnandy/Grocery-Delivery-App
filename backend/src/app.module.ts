@@ -22,6 +22,8 @@ import { isProduction, loggerConfig } from './logger/logger.config.js';
 import { UserModule } from './user/user.module.js';
 import { ProductsModule } from './products/products.module.js';
 import { AddressModule } from './address/address.module.js';
+import { OrderModule } from './order/order.module.js';
+import { DeliveryModule } from './delivery/delivery.module.js';
 
 @Module( {
   imports: [
@@ -68,6 +70,8 @@ import { AddressModule } from './address/address.module.js';
     UserModule,
     ProductsModule,
     AddressModule,
+    OrderModule,
+    DeliveryModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

@@ -2,26 +2,31 @@ import { useEffect, useState } from "react"
 import { ZapIcon, PackageSearchIcon } from "lucide-react"
 import { Link } from "react-router-dom"
 import type { Product } from "../types"
-import { dummyProducts } from "../assets/assets"
 import ProductsCard from "../components/ProductsCard"
 import ProductsGridSkeleton from "../components/ProductsGridSkeleton"
+import { api } from "../config/api.config"
 
 const FlashDeals = () =>
 {
     const [ products, setProducts ] = useState<Product[]>( [] )
     const [ loading, setLoading ] = useState<boolean>( true )
 
-    const fetchProducts = () =>
+    const fetchProducts = async () =>
     {
-        setProducts( dummyProducts.filter( ( product ) => product.stock > 0 ) )
+        try
+        {
+            const res = await api<Product[]>( "/products/flash-deals", { silent: true } )
+            setProducts( res.data ?? [] )
+        } catch
+        {
+            setProducts( [] )
+        }
+        setLoading( false )
     }
 
     useEffect( () =>
     {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchProducts()
-        const t = setTimeout( () => setLoading( false ), 1000 )
-        return () => clearTimeout( t ) // avoids a state update after unmount
     }, [] )
 
     return (
@@ -59,7 +64,7 @@ const FlashDeals = () =>
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         { products.map( ( product ) => (
-                            <ProductsCard key={ product._id } product={ product } />
+                            <ProductsCard key={ product.id } product={ product } />
                         ) ) }
                     </div>
                 ) }

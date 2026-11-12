@@ -2,10 +2,11 @@ import { useEffect, useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
 import { Home, SlidersHorizontalIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, PackageSearchIcon } from "lucide-react"
 import type { Product } from "../types"
-import { categoriesData, dummyProducts } from "../assets/assets"
+import { categoriesData } from "../assets/assets"
 import ProductsCard from "../components/ProductsCard"
 import SortSelect from "../components/SortSelect"
 import ProductsGridSkeleton from "../components/ProductsGridSkeleton"
+import { api } from "../config/api.config"
 
 const PAGE_SIZE = 12
 
@@ -38,12 +39,14 @@ export default function Products ()
     {
         setLoading( true )
 
-        // filter
-        let result = dummyProducts.filter( ( product ) =>
-            ( category === "" || product.category === category ) &&
-            ( !minPrice || product.price >= minPrice ) &&
-            ( !maxPrice || product.price <= maxPrice )
-        )
+        try
+        {
+            const res = await api<Product[]>( "/products", { silent: true } )
+            let result = ( res.data ?? [] ).filter( ( product ) =>
+                ( category === "" || product.category === category ) &&
+                ( !minPrice || product.price >= minPrice ) &&
+                ( !maxPrice || product.price <= maxPrice )
+            )
 
         // sort
         switch ( sort )
@@ -67,7 +70,13 @@ export default function Products ()
         setTotalCount( result.length )
         setTotalPages( pages )
         setProducts( result.slice( ( page - 1 ) * PAGE_SIZE, page * PAGE_SIZE ) )
-        
+        } catch
+        {
+            setProducts( [] )
+        } finally
+        {
+            setLoading( false )
+        }
     }
 
     const upDateFilters = ( key: string, value: string ) =>
@@ -253,7 +262,7 @@ export default function Products ()
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                                 { products.map( ( product ) => (
-                                    <ProductsCard key={ product._id } product={ product } />
+                                    <ProductsCard key={ product.id } product={ product } />
                                 ) ) }
                             </div>
                         ) }

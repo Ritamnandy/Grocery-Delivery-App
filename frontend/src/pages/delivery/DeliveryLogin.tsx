@@ -4,9 +4,10 @@ import { Link, useNavigate } from "react-router-dom"
 import { AlertCircleIcon, ArrowLeftIcon, BikeIcon, LockIcon, MailIcon } from "lucide-react"
 import { heroSectionData } from "../../assets/assets"
 import FloatingInput from "../../components/FloatingInput"
+import { api } from "../../config/api.config"
 
-// Change to your delivery partner Google route if it's different from the customer one
-const GOOGLE_URL = import.meta.env.VITE_GOOGLE_AUTH_URL
+// Google OAuth URL for delivery partners
+const GOOGLE_URL = `${ import.meta.env.VITE_API_URL }/auth/google`
 
 type FormValues = {
     email: string
@@ -28,10 +29,12 @@ const navigate=useNavigate()
         setServerError( "" )
         try
         {
-            // TODO: call your delivery partner login API here, then navigate to the partner dashboard
-            console.log( data )
-            await new Promise( ( r ) => setTimeout( r, 1000 ) )
-            navigate( '/delivery' )
+            await api( "/delivery/login", {
+                method: "POST",
+                body: { email: data.email, password: data.password },
+                successMessage: "Welcome back!",
+            } )
+            navigate( "/delivery" )
             window.scrollTo( 0, 0 )
         } catch
         {

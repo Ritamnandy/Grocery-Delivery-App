@@ -9,7 +9,8 @@ import
         MapPinIcon, PackageIcon, PackageSearchIcon, PhoneIcon, TruckIcon,
     } from "lucide-react"
 import type { Order } from "../types"
-import { dummyDashboardOrdersData, statusStyles } from "../assets/assets"
+import { api } from "../config/api.config"
+import { statusStyles } from "../assets/assets"
 
 const STEPS = [
     { status: "Placed", icon: ClockIcon },
@@ -83,9 +84,16 @@ function OrderTracking ()
     const [ loading, setLoading ] = useState<boolean>( true )
     const [ liveLocation, setLiveLocation ] = useState<{ lat: number; lng: number } | null>( null )
 
-    const fetchOrder = () =>
+    const fetchOrder = async () =>
     {
-        setOrder( ( dummyDashboardOrdersData as any as Order[] ).find( ( o ) => o._id === id ) || null )
+        try
+        {
+            const res = await api<Order>( `/orders/${ id }`, { silent: true } )
+            setOrder( res.data ?? null )
+        } catch
+        {
+            setOrder( null )
+        }
     }
 
     useEffect( () =>
@@ -190,7 +198,7 @@ function OrderTracking ()
 
                 <div className="flex items-start justify-between gap-3 mb-6">
                     <div>
-                        <h1 className="text-xl font-semibold text-app-green">Order #{ order._id.slice( -8 ).toUpperCase() }</h1>
+                        <h1 className="text-xl font-semibold text-app-green">Order #{ order.id.slice( -8 ).toUpperCase() }</h1>
                         <p className="text-xs text-app-text-light mt-1">Placed on { formatLongDate( order.createdAt ) }</p>
                     </div>
                     <span className={ `px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap ${ statusStyles[ statusKey ] ?? "bg-gray-100 text-zinc-600" }` }>

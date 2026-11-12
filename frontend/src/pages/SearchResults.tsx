@@ -2,10 +2,11 @@ import { useEffect, useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
 import { Home, PackageSearchIcon, SearchIcon, XIcon } from "lucide-react"
 import type { Product } from "../types"
-import { categoriesData, dummyProducts } from "../assets/assets"
+import { categoriesData } from "../assets/assets"
 import ProductsCard from "../components/ProductsCard"
 import ProductsGridSkeleton from "../components/ProductsGridSkeleton"
 import SortSelect from "../components/SortSelect"
+import { api } from "../config/api.config"
 
 const SORT_OPTIONS = [
     { value: "", label: "Best match" },
@@ -25,40 +26,50 @@ function SearchResults ()
     const query = ( searchParams.get( "q" ) || "" ).trim()
     const sort = searchParams.get( "sort" ) || ""
 
-    const fetchProducts = () =>
+    const fetchProducts = async () =>
     {
-        // TODO: replace with your search API call
-        if ( !query )
+        setLoading( true )
+        try
+        {
+            const res = await api<Product[]>( "/products", { silent: true } )
+            const all = res.data ?? []
+
+            if ( !query )
+            {
+                setProducts( [] )
+                return
+            }
+
+            // every word must match the product name or its category
+            const words = query.toLowerCase().split( /\s+/ ).filter( Boolean )
+            let result = all.filter( ( p ) =>
+            {
+                const text = `${ p.name } ${ p.category }`.toLowerCase()
+                return words.every( ( w ) => text.includes( w ) )
+            } )
+
+            switch ( sort )
+            {
+                case "price_asc":
+                    result = [ ...result ].sort( ( a, b ) => a.price - b.price )
+                    break
+                case "price_desc":
+                    result = [ ...result ].sort( ( a, b ) => b.price - a.price )
+                    break
+                case "rating":
+                    result = [ ...result ].sort( ( a, b ) => b.rating - a.rating )
+                    break
+                case "discount":
+                    result = [ ...result ].sort( ( a, b ) => b.discount - a.discount )
+                    break
+            }
+
+            setProducts( result )
+        } catch
         {
             setProducts( [] )
-            return
         }
-
-        // every word must match the product name or its category
-        const words = query.toLowerCase().split( /\s+/ ).filter( Boolean )
-        let result = dummyProducts.filter( ( p ) =>
-        {
-            const text = `${ p.name } ${ p.category }`.toLowerCase()
-            return words.every( ( w ) => text.includes( w ) )
-        } )
-
-        switch ( sort )
-        {
-            case "price_asc":
-                result = [ ...result ].sort( ( a, b ) => a.price - b.price )
-                break
-            case "price_desc":
-                result = [ ...result ].sort( ( a, b ) => b.price - a.price )
-                break
-            case "rating":
-                result = [ ...result ].sort( ( a, b ) => b.rating - a.rating )
-                break
-            case "discount":
-                result = [ ...result ].sort( ( a, b ) => b.discount - a.discount )
-                break
-        }
-
-        setProducts( result )
+        setLoading( false )
     }
 
     useEffect( () =>
@@ -194,7 +205,7 @@ function SearchResults ()
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-10">
                         { products.map( ( product ) => (
-                            <ProductsCard key={ product._id } product={ product } />
+                            <ProductsCard key={ product.id } product={ product } />
                         ) ) }
                     </div>
                 ) }

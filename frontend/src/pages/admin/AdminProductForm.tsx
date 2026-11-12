@@ -1,15 +1,20 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
-import { categoriesData, dummyProducts } from "../../assets/assets";
+import { categoriesData } from "../../assets/assets";
 import Loading from "../../components/Loading";
+import axios from "axios";
+import { api } from "../../config/api.config";
+import toast from "react-hot-toast";
+
+const BASE_URL = import.meta.env.VITE_API_URL as string;
 
 export default function AdminProductForm() {
     const { id } = useParams();
     const isEdit = Boolean(id);
 
     const [loading, setLoading] = useState(isEdit);
-    const saving = false;
+    const [saving, setSaving] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
 
     const [formData, setFormData] = useState({
@@ -27,19 +32,24 @@ export default function AdminProductForm() {
     useEffect(() => {
         const fetchData = async () => {
             if (isEdit) {
-                const product = dummyProducts.find((p) => p._id === id)
-                if (product) {
-                    setFormData({
-                        name: product.name,
-                        description: product.description,
-                        price: String(product.price),
-                        originalPrice: String(product.originalPrice),
-                        image: product.image,
-                        category: product.category,
-                        unit: product.unit,
-                        stock: String(product.stock),
-                        isOrganic: product.isOrganic,
-                    })
+                try {
+                    const res = await api(`/products/${ id }`, { silent: true });
+                    const product = res.data ?? null;
+                    if (product) {
+                        setFormData({
+                            name: product.name,
+                            description: product.description,
+                            price: String(product.price),
+                            originalPrice: String(product.originalPrice),
+                            image: product.image,
+                            category: product.category,
+                            unit: product.unit,
+                            stock: String(product.stock),
+                            isOrganic: product.isOrganic,
+                        });
+                    }
+                } catch {
+                    // api() already showed the error toast
                 }
             }
             setLoading(false)
@@ -49,7 +59,38 @@ export default function AdminProductForm() {
 
     const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
+        setSaving(true);
+        try {
+            const fd = new FormData();
+            if (imageFile) fd.append("productImage", imageFile);
+            fd.append("name", formData.name);
+            fd.append("description", formData.description);
+            fd.append("price", formData.price);
+            fd.append("originalPrice", formData.originalPrice);
+            fd.append("stock", formData.stock);
+            fd.append("category", formData.category);
+            fd.append("unit", formData.unit);
+            fd.append("isOrganic", formData.isOrganic ? "true" : "false");
 
+            if (isEdit && id) {
+                await axios.patch(`${ BASE_URL }/products/${ id }`, fd, {
+                    withCredentials: true,
+                });
+                toast.success("Product updated");
+            } else {
+                await axios.post(`${ BASE_URL }/products`, fd, {
+                    withCredentials: true,
+                });
+                toast.success("Product created");
+            }
+
+            setSaving(false);
+            window.location.href = "/admin/products";
+        } catch {
+            setSaving(false);
+            // api() / axios error toasts are not shown here; show a generic one
+            toast.error("Failed to save product");
+        }
     };
 
     return (
@@ -73,17 +114,19 @@ export default function AdminProductForm() {
                             <div>
                                 <label className="block text-sm font-medium text-zinc-700 mb-2">Category</label>
                                 <select required value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green focus:ring-1 focus:ring-app-green outline-none transition-all bg-white">
-                                    <option value="">Select a category</option>
-                                    {categoriesData.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+                                    <option value=""></option>
+                                    {categoriesData.map((c) => (
+                                        <option key={c.slug} value={c.slug}>{c.name}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-zinc-700 mb-2">Price ($)</label>
-                                <input required type="number" step="0.01" min="0" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green focus:ring-1 focus:ring-app-green outline-none transition-all" />
+                                <label className="block text-sm font-medium text-zinc-700 mb-2">Price</label>
+                                <input required type="number" min="0" step="0.01" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green focus:ring-1 focus:ring-app-green outline-none transition-all" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-zinc-700 mb-2">Original Price ($) - Optional</label>
-                                <input type="number" step="0.01" min="0" value={formData.originalPrice} onChange={e => setFormData({ ...formData, originalPrice: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green focus:ring-1 focus:ring-app-green outline-none transition-all" />
+                                <label className="block text-sm font-medium text-zinc-700 mb-2">Original Price</label>
+                                <input type="number" min="0" step="0.01" value={formData.originalPrice} onChange={e => setFormData({ ...formData, originalPrice: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green focus:ring-1 focus:ring-app-green outline-none transition-all" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-zinc-700 mb-2">Unit</label>
